@@ -1,0 +1,14 @@
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+#start-btn {
+    font-size: x-large;
+}
+
+#game-container {
+    display: none;
+}
