@@ -1,5 +1,5 @@
-import { cnv, ctx } from "./canvas"
-import { player } from "./player/player"
+import { cnv, ctx } from "./graphic"
+import { player } from "../entities/player"
 
 // camera for keeping an eye on the player
 export const cam = {
@@ -11,12 +11,12 @@ export const cam = {
         this.w = 16 // meters in game
         this.h = 9
         this.config.meter2pixels = cnv.width / this.w
-        this.pos = {x: 0, y: 0}
+        this.pos = {x: player.pos.x - this.w / 2, y: player.pos.y - this.h / 2}
         // boxOfStillness is a collisionbox which triggers camera movement
         this.boxOfStillness = {
-            pos: {x: 4, y: 2},
+            pos: {x: this.pos.x + 4, y: this.pos.y + 2.5},
             w: 8,
-            h: 5
+            h: 4
         }
     },
     update() {
@@ -49,8 +49,8 @@ export const cam = {
     },
     screenPos2GamePos(pos) {
         return {
-            x: (pos.x + cam.pos.x) / this.config.meter2pixels,
-            y: (pos.y + cam.pos.y) / this.config.meter2pixels
+            x: (pos.x) / this.config.meter2pixels + cam.pos.x,
+            y: (pos.y) / this.config.meter2pixels + cam.pos.y
         }
     }, 
     gamePos2ScreenPos(pos) {

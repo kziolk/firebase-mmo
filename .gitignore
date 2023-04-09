@@ -1,3 +1,13 @@
+# firebase config file
+app/src/db/firebaseConfig.js
+app/dist/bundle.js
+
+# webpack packages
+app/package-lock.json
+
+# old files
+old
+
 # Logs
 app/logs
 app/*.log
@@ -64,9 +74,3 @@ app/.yarn-integrity
 
 # dotenv environment variables file
 app/.env
-
-# webpack packages
-app/package-lock.json
-
-# old files
-old

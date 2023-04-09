@@ -1,5 +1,5 @@
-import { cam } from "./camera";
-import { ctx } from "./canvas";
+import { cam } from "./graphic/camera";
+import { ctx } from "./graphic/graphic";
 
 export const terrain = {
     init() {
