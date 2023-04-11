@@ -8,8 +8,10 @@ let lastUpdateTime = 0
 
 export const gameDB = {
     update() {
-        if (timeNow - lastUpdateTime > DB_UPDATE_DELAY)
-            savePlayer();
+        if (timeNow - lastUpdateTime > DB_UPDATE_DELAY) {
+            savePlayer()
+            lastUpdateTime = timeNow
+        }
     }
 }
 

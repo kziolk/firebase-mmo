@@ -44,7 +44,7 @@ function applyKnockbackOnMob(mob) {
     let dist = Math.sqrt(dx*dx + dy*dy)
     let ratio = 4 / dist // make mob fly 2 meters per sec
 
-    mob.mEntity.state = {
+    mob.state = {
         type: "knockback",
         vx: dx * ratio,
         vy: dy * ratio,

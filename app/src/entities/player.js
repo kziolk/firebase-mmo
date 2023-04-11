@@ -2,37 +2,44 @@ import { cam } from "../graphic/camera";
 import { ctx } from "../graphic/graphic"
 import { combat } from "../combat/combat";
 import { input } from "../input";
-import { MovingEntity } from "./MovingEntity";
+import { MovingEntity, vectorUpdateKnockback } from "./MovingEntity";
 
 export const PLAYER_RADIUS = .4;
 export const PLAYER_REACH_DISTANCE = 1.2
 const PLAYER_SPEED = 0.004
 
-export const player = {
-    init(position) {
-        this.mEntity = new MovingEntity({
-            type: "circle",
-            pos: position,
-            r: PLAYER_RADIUS
-        }, PLAYER_SPEED)
-        this.pos = this.mEntity.hitbox.pos // game position
-        this.v = this.mEntity.v     // velocity vector
+class Player extends MovingEntity {
+    constructor() {
+        super({
+                type: "circle",
+                pos: {x: 0, y: 0},
+                r: PLAYER_RADIUS
+            }, PLAYER_SPEED)
+        this.pos = this.hitbox.pos
         this.reachPoint = {x: 0, y: 0}
         this.currentWeapon = "fist"
         this.attackTriggered = false
-    },
+    }
+
+    init(pos) {
+        this.pos.x = pos.x
+        this.pos.y = pos.y
+    }
+
     updateActions(dt) {
         updatePlayerReachPoint()
         if (this.attackTriggered) {
-            combat.attack(this.mEntity.hitbox, this.reachPoint, this.currentWeapon)
+            combat.attack(this.hitbox, this.reachPoint, this.currentWeapon)
             this.attackTriggered = false
         }
-    },
+    }
+
     updateMovement(dt) {
-        updatePlayerVelocityVector()
+        updatePlayerVelocityVector(dt)
         // move by velocity
-        this.mEntity.update(dt)
-    },
+        this.move(dt)
+    }
+
     draw() {
         // map game position to screen position
         const drawPos = cam.gamePos2ScreenPos(this.pos)
@@ -58,6 +65,8 @@ export const player = {
     }
 }
 
+export const player = new Player()
+
 function updatePlayerReachPoint() {
     // face the mouse coursor
     // get distance from player to mouse in game coords
@@ -74,17 +83,24 @@ function updatePlayerReachPoint() {
     }
 }
 
-function updatePlayerVelocityVector() {
-    // update player movement controls
-    if (input.keyboard.pressingLeft && !input.keyboard.pressingRight)
-        player.v.x = -1
-    else if (input.keyboard.pressingRight && !input.keyboard.pressingLeft)
-        player.v.x = 1
-    else player.v.x = 0
+function updatePlayerVelocityVector(dt) {
+    playerVectorUpdateFoos[player.state.type](player, dt)
+}
 
-    if (input.keyboard.pressingUp && !input.keyboard.pressingDown)
-        player.v.y = -1
-    else if (input.keyboard.pressingDown && !input.keyboard.pressingUp)
-        player.v.y = 1
-    else player.v.y = 0
+const playerVectorUpdateFoos = {
+    default: function (mEntity, dt) {
+        // update player movement controls
+        if (input.keyboard.pressingLeft && !input.keyboard.pressingRight)
+            player.v.x = -1
+        else if (input.keyboard.pressingRight && !input.keyboard.pressingLeft)
+            player.v.x = 1
+        else player.v.x = 0
+    
+        if (input.keyboard.pressingUp && !input.keyboard.pressingDown)
+            player.v.y = -1
+        else if (input.keyboard.pressingDown && !input.keyboard.pressingUp)
+            player.v.y = 1
+        else player.v.y = 0
+    },
+    knockback: vectorUpdateKnockback
 }
