@@ -3,6 +3,7 @@ import { ctx } from "../graphic/graphic"
 import { combat } from "../combat/combat";
 import { input } from "../input";
 import { MovingEntity, vectorUpdateKnockback } from "./MovingEntity";
+import { Sprite } from "../graphic/sprite";
 
 export const PLAYER_RADIUS = .4;
 export const PLAYER_REACH_DISTANCE = 1.2
@@ -19,6 +20,7 @@ class Player extends MovingEntity {
         this.reachPoint = {x: 0, y: 0}
         this.currentWeapon = "fist"
         this.attackTriggered = false
+        this.sprite = new Sprite()
     }
 
     init(pos) {
@@ -38,13 +40,40 @@ class Player extends MovingEntity {
         updatePlayerVelocityVector(dt)
         // move by velocity
         this.move(dt)
+
     }
 
     draw() {
+        // set animation
+        let dx = this.reachPoint.x - this.pos.x
+        let dy = this.reachPoint.y - this.pos.y
+        if (Math.abs(dx) > Math.abs(dy)) {
+            // left or right
+            if (dx > 0) {
+                if (this.v.x || this.v.y) this.sprite.setAnimation("walking_right")
+                else this.sprite.setAnimation("idle_right")
+            } 
+            else {
+                if (this.v.x || this.v.y) this.sprite.setAnimation("walking_left")
+                else this.sprite.setAnimation("idle_left")
+            }
+        } else {
+            if (dy > 0) {
+                if (this.v.x || this.v.y) this.sprite.setAnimation("walking_down")
+                else this.sprite.setAnimation("idle_down")
+            }
+            else {
+                if (this.v.x || this.v.y) this.sprite.setAnimation("walking_up")
+                else this.sprite.setAnimation("idle_up")
+            }
+        }
+
+        this.sprite.updatePos(this.pos)
+        this.sprite.draw()
         // map game position to screen position
         const drawPos = cam.gamePos2ScreenPos(this.pos)
         const drawRadius = PLAYER_RADIUS * cam.config.meter2pixels 
-        ctx.fillStyle = 'white'
+        ctx.fillStyle = 'rgba(0,255,255,0.5)'
         ctx.beginPath()
         ctx.arc(drawPos.x, drawPos.y, drawRadius, 0, Math.PI*2, true)
         ctx.fill()

@@ -3,10 +3,8 @@ export const ctx = cnv.getContext('2d')
 
 export const graphic = {
     init() {
-        ctx.imageSmoothingEnabled = false;
         cnv.width = 1024
         cnv.height = 576
-        // center horisontally
         cnv.style.display = 'block'
         cnv.style.margin = 'auto'
         
@@ -15,6 +13,7 @@ export const graphic = {
         cnv.style.top = '50%'
         cnv.style.transform = 'translateY(-50%)'
 
+        ctx.imageSmoothingEnabled = false; // set this at the end
         // save to variable
         let cnvRect = cnv.getBoundingClientRect()
         this.screen.x = cnvRect.x 
@@ -28,6 +27,7 @@ export const graphic = {
             graphic.screen.y = cnvRect.y
             graphic.screen.w = cnvRect.width
             graphic.screen.h = cnvRect.height
+            ctx.imageSmoothingEnabled = false;
         });
     },
     screen: { }
