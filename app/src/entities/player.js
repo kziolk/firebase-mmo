@@ -1,9 +1,10 @@
 import { cam } from "../graphic/camera";
 import { ctx } from "../graphic/graphic"
-import { combat } from "../combat/combat";
+import { Weapon } from "../combat/Weapon";
 import { input } from "../input";
 import { MovingEntity, vectorUpdateKnockback } from "./MovingEntity";
 import { Sprite } from "../graphic/sprite";
+import { mobs } from "./mobs/mobsManager";
 
 export const PLAYER_RADIUS = .4;
 export const PLAYER_REACH_DISTANCE = 1.2
@@ -18,7 +19,7 @@ class Player extends MovingEntity {
             }, PLAYER_SPEED)
         this.pos = this.hitbox.pos
         this.reachPoint = {x: 0, y: 0}
-        this.currentWeapon = "fist"
+        this.weapon = new Weapon(this)
         this.attackTriggered = false
         this.sprite = new Sprite()
     }
@@ -31,7 +32,7 @@ class Player extends MovingEntity {
     updateActions(dt) {
         updatePlayerReachPoint()
         if (this.attackTriggered) {
-            combat.attack(this.hitbox, this.reachPoint, this.currentWeapon)
+            this.weapon.attack(mobs)
             this.attackTriggered = false
         }
     }
