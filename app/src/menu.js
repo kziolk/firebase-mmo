@@ -32,6 +32,9 @@ export const menu = {
         const quitBtn = document.createElement("button")
         quitBtn.textContent = "quit"
         quitBtn.className = "menu-btn"
+        quitBtn.onclick = function () {
+            window.location.reload()
+        }
         menuOption2.appendChild(quitBtn)
     },
     close() {
