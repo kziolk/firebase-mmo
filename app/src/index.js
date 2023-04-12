@@ -21,3 +21,28 @@ export function initializeGame() {
 }
 
 authenticateUser()
+
+// let camX = 0.1, camW = 10
+// let chunkX = -128
+// console.log(Math.floor((camX - chunkX) / 128))
+// console.log(Math.floor((camX + camW - chunkX) / 128))
+
+// camX = -0.1
+// console.log(Math.floor((camX - chunkX) / 128))
+// console.log(Math.floor((camX + camW - chunkX) / 128))
+
+// camX = -128.1
+// console.log(Math.floor((camX - chunkX) / 128))
+// console.log(Math.floor((camX + camW - chunkX) / 128))
+
+// camX = -138.1
+// console.log(Math.floor((camX - chunkX) / 128))
+// console.log(Math.floor((camX + camW - chunkX) / 128))
+
+// camX = 127.9 - chunkX
+// console.log(Math.floor((camX - chunkX) / 128))
+// console.log(Math.floor((camX + camW - chunkX) / 128))
+
+// camX = 128.01 - chunkX
+// console.log(Math.floor((camX - chunkX) / 128))
+// console.log(Math.floor((camX + camW - chunkX) / 128))

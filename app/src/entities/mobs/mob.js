@@ -2,7 +2,7 @@ import { cam } from "../../graphic/camera"
 import { ctx } from "../../graphic/graphic"
 import { player } from "../player"
 import { MovingEntity, vectorUpdateKnockback } from "../MovingEntity"
-import { MOB_RADIUS, MOB_SPEED } from "../entityConsts"
+import { MOB_RADIUS, MOB_SPEED, MOB_RANGE } from "../entityConsts"
 
 export class Mob extends MovingEntity {
     constructor(position) { 
@@ -12,6 +12,7 @@ export class Mob extends MovingEntity {
                 r: MOB_RADIUS
             }, MOB_SPEED)
         this.pos = this.hitbox.pos
+        this.health = 3
     }
 
     updateActions(dt) {}

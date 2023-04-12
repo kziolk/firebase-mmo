@@ -8,7 +8,7 @@ const PIXELS_PER_METER = 32
 export class Sprite {
     constructor() {
         this.image = new Image()
-        this.image.src = "img/player.png"
+        this.image.src = "img/entities/player.png"
         this.pos = {x: 0, y: 0}
 
         this.lastAnimationTimeStamp = 0

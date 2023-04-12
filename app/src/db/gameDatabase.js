@@ -29,7 +29,6 @@ export const database = {
 }
 
 function savePlayer() {
-
     set(playerRef, {
         x: player.pos.x,
         y: player.pos.y,

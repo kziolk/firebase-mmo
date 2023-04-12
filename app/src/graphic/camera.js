@@ -8,15 +8,15 @@ export const cam = {
     },
     init() {
         // hardcoded for 16/9 ratio
-        this.w = 16 // meters in game
-        this.h = 9
-        this.config.meter2pixels = cnv.width / this.w
-        this.pos = {x: player.pos.x - this.w / 2, y: player.pos.y - this.h / 2}
+        this.width = 16 // meters in game
+        this.height = 9
+        this.config.meter2pixels = cnv.width / this.width
+        this.pos = {x: player.pos.x - this.width / 2, y: player.pos.y - this.height / 2}
         // boxOfStillness is a collisionbox which triggers camera movement
         this.boxOfStillness = {
             pos: {x: this.pos.x + 4, y: this.pos.y + 2.5},
-            w: 8,
-            h: 4
+            width: 8,
+            height: 4
         }
     },
     update() {
@@ -26,12 +26,12 @@ export const cam = {
         let dy = 0
         if (player.pos.x < this.boxOfStillness.pos.x)
             dx = player.pos.x - this.boxOfStillness.pos.x
-        else if (player.pos.x > this.boxOfStillness.pos.x + this.boxOfStillness.w)
-            dx = player.pos.x - this.boxOfStillness.pos.x - this.boxOfStillness.w
+        else if (player.pos.x > this.boxOfStillness.pos.x + this.boxOfStillness.width)
+            dx = player.pos.x - this.boxOfStillness.pos.x - this.boxOfStillness.width
         if (player.pos.y < this.boxOfStillness.pos.y)
             dy = player.pos.y - this.boxOfStillness.pos.y
-        else if (player.pos.y > this.boxOfStillness.pos.y + this.boxOfStillness.h)
-            dy = player.pos.y - this.boxOfStillness.pos.y - this.boxOfStillness.h
+        else if (player.pos.y > this.boxOfStillness.pos.y + this.boxOfStillness.height)
+            dy = player.pos.y - this.boxOfStillness.pos.y - this.boxOfStillness.height
         
         // move the camera and boxOfStillness by calculated distance
         this.pos.x += dx
@@ -42,8 +42,8 @@ export const cam = {
     draw() {
         ctx.strokeStyle = "#aaaa00"
         let boxDrawPos = this.gamePos2ScreenPos(this.boxOfStillness.pos)
-        let boxWidth = this.boxOfStillness.w * this.config.meter2pixels
-        let boxHeight = this.boxOfStillness.h * this.config.meter2pixels
+        let boxWidth = this.boxOfStillness.width * this.config.meter2pixels
+        let boxHeight = this.boxOfStillness.height * this.config.meter2pixels
         ctx.lineWidth = 4;
         ctx.strokeRect(boxDrawPos.x, boxDrawPos.y, boxWidth, boxHeight);
     },

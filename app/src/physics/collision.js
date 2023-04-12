@@ -1,3 +1,5 @@
+import { terrain } from "../terrain"
+
 export const collision = {
     init() { },
     bounceOffCbox(cBoxDynamic, cBoxStatic) {
@@ -9,8 +11,34 @@ export const collision = {
         if (checkDetection)
             return checkDetection(hitbox1, hitbox2)
         else return false
+    },
+    getCBoxesAround(pos) {
+        let cBoxes = []
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                let tile = terrain.getTileAt({
+                    x: Math.floor(pos.x) + dx,
+                    y: Math.floor(pos.y) + dy
+                })
+                let collisionAtTile = tileValToCollisionBox[tile.val]
+                if (collisionAtTile)
+                    cBoxes.push(collisionAtTile(tile.x, tile.y))
+            }
+        }
+        return cBoxes
     }
 }
+
+const tileValToCollisionBox = {
+    1: function (x, y) {
+        return {
+            type: "circle",
+            pos: {x: x + 0.5, y: y + 0.5},
+            r: 0.5
+        }
+    }
+}
+
 const bounceFoos = {
     circle_circle: function (cBoxDynamic, cBoxStatic) {
         let radii = cBoxDynamic.r + cBoxStatic.r
