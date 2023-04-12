@@ -10,6 +10,8 @@ export class Sprite {
         this.image = new Image()
         this.image.src = "img/entities/player.png"
         this.pos = {x: 0, y: 0}
+        this.gameWidth = 1
+        this.gameHeight = 1
 
         this.lastAnimationTimeStamp = 0
         this.animationFrame = 0
@@ -21,8 +23,9 @@ export class Sprite {
     }
 
     updatePos(pos) {
-        const adjustedPos = cam.gamePos2ScreenPos(
-            {x: pos.x - 1, y: pos.y - 0.9 - PLAYER_RADIUS})
+        const adjustedPos = cam.gamePos2ScreenPos({
+            x: pos.x - this.gameWidth / 2, 
+            y: pos.y - this.gameHeight + PLAYER_RADIUS})
         this.pos.x = adjustedPos.x
         this.pos.y = adjustedPos.y
     }
@@ -44,8 +47,8 @@ export class Sprite {
             32,
             this.pos.x,
             this.pos.y,
-            cam.config.meter2pixels * 2,
-            cam.config.meter2pixels * 2
+            cam.config.meter2pixels * this.gameWidth,
+            cam.config.meter2pixels * this.gameHeight
         )
     }
 }

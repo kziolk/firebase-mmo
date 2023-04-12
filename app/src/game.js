@@ -1,5 +1,5 @@
 import { cam } from "./graphic/camera"
-import { ctx, cnv } from "./graphic/graphic"
+import { graphic } from "./graphic/graphic"
 import { debugInfo } from "./dbg"
 import { mobsManager } from "./entities/mobs/mobsManager"
 import { input } from "./input"
@@ -38,7 +38,7 @@ export const game = {
         // start loop
         loop = setInterval(() => {
             update()
-            draw()
+            graphic.draw()
         }, 1000 / this.config.fpsLimit)
 
         consoleLogSomethingAfterInit();
@@ -67,27 +67,6 @@ function update() {
     // graphic / performance info update
     cam.update()
     debugInfo.update()
-}
-
-function draw() {
-    ctx.fillStyle = 'black'
-    ctx.fillRect(0, 0, cnv.width, cnv.height)
-    terrain.draw()
-    mobsManager.draw()
-    playersManager.draw()
-    player.draw()
-    drawCoords()
-    cam.draw()
-}
-
-function drawCoords() {
-    ctx.fillStyle = 'yellow'
-    ctx.font = "20px Arial";
-    ctx.fillText("fps: " + debugInfo.fps.toFixed(2), 24, 30)
-    ctx.fillText("player x: " + player.pos.x.toFixed(2) + ", y: " + player.pos.y.toFixed(2), 24, 60)
-    ctx.fillText("cam x: " + cam.pos.x.toFixed(2) + ", y: " + cam.pos.y.toFixed(2), 24, 90)
-    ctx.fillText("that box x: " + cam.boxOfStillness.pos.x.toFixed(2) + ", y: " + cam.boxOfStillness.pos.y.toFixed(2), 24, 120)
-    ctx.fillText("mouse x: " + input.mouse.pos.x.toFixed(2) + ", y: " + input.mouse.pos.y.toFixed(2), 24, 150)
 }
 
 function consoleLogSomethingAfterInit() {

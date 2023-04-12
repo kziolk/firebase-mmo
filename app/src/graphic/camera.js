@@ -14,9 +14,9 @@ export const cam = {
         this.pos = {x: player.pos.x - this.width / 2, y: player.pos.y - this.height / 2}
         // boxOfStillness is a collisionbox which triggers camera movement
         this.boxOfStillness = {
-            pos: {x: this.pos.x + 4, y: this.pos.y + 2.5},
-            width: 8,
-            height: 4
+            pos: {x: this.pos.x + 6, y: this.pos.y + 3.5},
+            width: 4,
+            height: 2
         }
     },
     update() {

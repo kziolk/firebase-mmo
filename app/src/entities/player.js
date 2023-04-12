@@ -41,7 +41,6 @@ class Player extends MovingEntity {
         updatePlayerVelocityVector(dt)
         // move by velocity
         this.move(dt)
-
     }
 
     draw() {
