@@ -12,9 +12,9 @@ import { startPlayersListener } from "./db/players"
 let loop
 let oldTime, dt
 export var timeNow = 0
-export const GAMEMODE = "singleplayer"
 
 export const game = {
+    mode: "singleplayer",
     config: {
         fpsLimit: 60
     },
@@ -23,8 +23,10 @@ export const game = {
         input.init();
         terrain.init()
         
-        startPlayersListener()
+        if (this.mode == "multiplayer")
+            startPlayersListener()
 
+        // set player positon
         player.init({x: 50, y: 30})
 
         // camera needs player to be initiated
@@ -32,6 +34,7 @@ export const game = {
         
         // start timer
         timeNow = oldTime = performance.now();
+
         // initialize more components which needed timer
         debugInfo.init()
         
@@ -49,6 +52,7 @@ export const game = {
 }
 
 function update() {
+    // grab current time and calculate frame delay
     oldTime = timeNow
     timeNow = performance.now();
     dt = timeNow - oldTime;
@@ -59,13 +63,17 @@ function update() {
     player.updateMovement(dt)
     mobsManager.updateMovement(dt)
 
+    // estimate closest real position of other players in multiplayer
+    //if (this.mode == "multiplayer")
     playersManager.updateMovement(dt)
 
     // save changes to DB
-    database.update()
+    if (game.mode == "multiplayer")
+        database.update()
 
-    // graphic / performance info update
+    // camera follows player
     cam.update()
+    // real fps tracking
     debugInfo.update()
 }
 

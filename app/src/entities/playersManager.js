@@ -58,6 +58,7 @@ export const playersManager = {
     updateMovement(dt) {
         Object.keys(players).forEach(playerKey=>{
             players[playerKey].move(dt)
+            //players[playerKey].yBottom = players[playerKey].pos.y + players[playerKey].hitbox.r
         })
     },
     setOtherPlayer(pKey, pVal) {

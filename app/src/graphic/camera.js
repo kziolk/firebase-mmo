@@ -4,13 +4,10 @@ import { player } from "../entities/player"
 // camera for keeping an eye on the player
 export const cam = {
     config: {
-        meter2pixels: null
+        meter2pixels: null // initiated 
     },
     init() {
-        // hardcoded for 16/9 ratio
-        this.width = 16 // meters in game
-        this.height = 9
-        this.config.meter2pixels = cnv.width / this.width
+        this.resize()
         this.pos = {x: player.pos.x - this.width / 2, y: player.pos.y - this.height / 2}
         // boxOfStillness is a collisionbox which triggers camera movement
         this.boxOfStillness = {
@@ -58,5 +55,11 @@ export const cam = {
             x: (pos.x - cam.pos.x) * this.config.meter2pixels,
             y: (pos.y - cam.pos.y) * this.config.meter2pixels
         }
+    },
+    resize() {
+        // hardcoded for 16/9 ratio
+        this.width = 16 // meters in game
+        this.height = 9
+        this.config.meter2pixels = cnv.width / this.width
     }
 }

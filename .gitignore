@@ -1,5 +1,5 @@
 # firebase config file
-app/src/db/firebaseConfig.js
+app/dist/firebaseConfig.js
 app/dist/bundle.js
 app/dist/nothing.js
 

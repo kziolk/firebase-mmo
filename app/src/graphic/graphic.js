@@ -1,45 +1,28 @@
 import { cam } from "./camera"
 import { debugInfo } from "../dbg"
-import { mobs, mobsManager } from "../entities/mobs/mobsManager"
+import { mobs } from "../entities/mobs/mobsManager"
 import { input } from "../input"
 import { player } from "../entities/player"
 import { CHUNK_SIZE, terrain } from "../terrain"
-import { players, playersManager } from "../entities/playersManager"
+import { players } from "../entities/playersManager"
 
 export const cnv = document.getElementById("game-container")
 export const ctx = cnv.getContext('2d')
 
 export const graphic = {
+    config: {
+        sizeRatio: 16/9
+    },
+    darken: false,
     init() {
-        // init canvas style and size
-        cnv.width = 1024
-        cnv.height = 576
-        cnv.style.display = 'block'
-        cnv.style.margin = 'auto'
-        
-        // center canvas vertically
-        cnv.style.position = 'relative'
-        cnv.style.top = '50%'
-        cnv.style.transform = 'translateY(-50%)'
-
-        ctx.imageSmoothingEnabled = false; // set this at the end
-        // save to variable for checking mouse relatively to canvas
-        let cnvRect = cnv.getBoundingClientRect()
-        this.screen.x = cnvRect.x 
-        this.screen.y = cnvRect.y
-        this.screen.w = cnvRect.width
-        this.screen.h = cnvRect.height
-
-        // save to variable every resize
+        // set size of canvas relative to the screen
+        resizeCanvas()
+        cam.resize()
+        // canvas on window resize
         window.addEventListener('resize', function() {
-            let cnvRect = cnv.getBoundingClientRect()
-            graphic.screen.x = cnvRect.x 
-            graphic.screen.y = cnvRect.y
-            graphic.screen.w = cnvRect.width
-            graphic.screen.h = cnvRect.height
-            ctx.imageSmoothingEnabled = false;
+            resizeCanvas()
+            cam.resize()
         });
-
         // init images
         Object.keys(imgData).forEach(imgId => {
             let img = imgs[imgId] = new Image();
@@ -51,11 +34,18 @@ export const graphic = {
         ctx.fillStyle = 'black'
         ctx.fillRect(0, 0, cnv.width, cnv.height)
 
+        // tiles and entities between tiles
         drawTerrain()
 
+        // debug info
         drawCoords()
 
+        // collision box a
         //cam.draw()
+        if(this.darken) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+            ctx.fillRect(0, 0, cnv.width, cnv.height)
+        }
     }
 }
 
@@ -81,7 +71,7 @@ function drawTerrain() {
 
     for (let y = topY; y < bottomY; y++) {
         let wallTiles = []
-        // layer 1: floor tiles
+        // layer 1: row of floor tiles
         ctx.strokeStyle = "#0090ff"
         ctx.lineWidth = 2
         for (let x = leftX; x < rightX; x++) {
@@ -96,10 +86,12 @@ function drawTerrain() {
             let drawX = topLeftDrawPos.x + dx * cam.config.meter2pixels
             let drawY = topLeftDrawPos.y + dy * cam.config.meter2pixels
             if(tileVal == 0) {
+                // tile doesn't have a wall
                 ctx.fillStyle = "#0c0c0c"
                 ctx.fillRect(drawX, drawY, cam.config.meter2pixels, cam.config.meter2pixels)
                 ctx.strokeRect(drawX, drawY, cam.config.meter2pixels, cam.config.meter2pixels)
             } else {
+                // tile has a wall. save it to render on top of entitites
                 ctx.fillStyle = "#0ca00c"
                 ctx.fillRect(drawX, drawY, cam.config.meter2pixels, cam.config.meter2pixels)
                 ctx.strokeRect(drawX, drawY, cam.config.meter2pixels, cam.config.meter2pixels)
@@ -125,7 +117,7 @@ function drawTerrain() {
             ctx.drawImage(wallTile.img, wallTile.x, wallTile.y, wallTile.width, wallTile.height)
         })
     }
-    // after that, draw all the rest entities
+    // after that, draw all of remaining entities
     while (nextEntityIdToDraw < allEntities.length) {
         allEntities[nextEntityIdToDraw].draw()
         nextEntityIdToDraw++
@@ -155,6 +147,34 @@ function sortAllEntities() {
     allEntities.sort((lhs, rhs) => lhs.yBottom - rhs.yBottom)
 }
 
+function resizeCanvas() {
+    let windowSizeRatio = window.innerWidth / window.innerHeight
+
+    if (windowSizeRatio > graphic.config.sizeRatio) {
+        // browser window is wider than 16/9
+        cnv.height = window.innerHeight
+        cnv.width = cnv.height * graphic.config.sizeRatio
+    } else {
+        // browser window is narrower than 16/9
+        cnv.width = window.innerWidth
+        cnv.height = cnv.width / graphic.config.sizeRatio
+    }
+    // init canvas style
+    cnv.style.display = 'block'
+    cnv.style.margin = 'auto'
+    // center canvas vertically
+    cnv.style.position = 'relative'
+    cnv.style.top = '50%'
+    cnv.style.transform = 'translateY(-50%)'
+
+    ctx.imageSmoothingEnabled = false; // set this at the end
+    // save to variable for checking mouse relatively to canvas
+    let cnvRect = cnv.getBoundingClientRect()
+    graphic.screen.x = cnvRect.x 
+    graphic.screen.y = cnvRect.y
+    graphic.screen.w = cnvRect.width
+    graphic.screen.h = cnvRect.height
+}
 
 
 let tileValToImgName = {

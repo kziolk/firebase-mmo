@@ -4,7 +4,7 @@ import { timeNow } from "../game";
 import { playerRef } from "./auth";
 import { db } from "./init";
 
-const DB_UPDATE_DELAY = 100
+const DB_UPDATE_DELAY = 50
 let lastUpdateTime = 0
 
 export const dbUpdater = {

@@ -5,6 +5,7 @@ export const GRID_SIZE = 3
 
 export const terrain = {
     init() {
+        // add 3x3 grid of chunks
         this.grid = new Array(GRID_SIZE)
         for (let x = 0; x < GRID_SIZE; x++) {
             this.grid[x] = new Array(GRID_SIZE)
@@ -16,6 +17,7 @@ export const terrain = {
     getTileAt(pos) {
         let chunkIdX = Math.floor((pos.x + CHUNK_SIZE) / CHUNK_SIZE)
         let chunkIdY = Math.floor((pos.y + CHUNK_SIZE) / CHUNK_SIZE)
+        // return "null" tile if it's outside the region
         if (chunkIdX < 0 || chunkIdX >= GRID_SIZE || chunkIdY < 0 || chunkIdY >= GRID_SIZE)
             return {val: 0}
         let chunk = this.grid[chunkIdX][chunkIdY]
@@ -30,19 +32,22 @@ export const terrain = {
     }
 }
 
-function createChunk(x, y) {
-    let random = alea(x + "_" + y)
+function createChunk(scaledX, scaledY) {
+    // create 128x128 tile area and randomize tile values (0: empty, 1: tree)
+    let generateRandom = alea(scaledX + "_" + scaledY)
     let tiles = new Array(CHUNK_SIZE)
     for (let x = 0; x < CHUNK_SIZE; x++) {
         tiles[x] = new Array(CHUNK_SIZE)
         for (let y = 0; y < CHUNK_SIZE; y++) {
-            if (x == 0 || y == 0) tiles[x][y] = (random() > 0.8) ? 0 : 1
-            else tiles[x][y] = (random() > 0.1) ? 0 : 1
+            // dense trees (80% chance) on chunk borders
+            if (x == 0 || y == 0) tiles[x][y] = (generateRandom() < 0.8) ? 1 : 0
+            // else 10% chance for tree
+            else tiles[x][y] = (generateRandom() < 0.1) ? 1 : 0
         }
     }
     return {
-        x: x * CHUNK_SIZE,
-        y: y * CHUNK_SIZE, 
+        x: scaledX * CHUNK_SIZE,
+        y: scaledY * CHUNK_SIZE, 
         tiles: tiles
     }
 }

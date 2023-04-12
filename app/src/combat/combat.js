@@ -21,7 +21,7 @@ export const combat = {
         let dx = p.pos.x - player.pos.x
         let dy = p.pos.y - player.pos.y
         let dist = Math.sqrt(dx*dx + dy*dy)
-        let ratio = 4 / dist // make mob fly 4 meters per sec
+        let ratio = 2 / dist // make mob fly 4 meters per sec
 
         dbUpdater.tasks.push({
             action: "set",
@@ -30,7 +30,7 @@ export const combat = {
                 type: "knockback",
                 vx: dx * ratio,
                 vy: dy * ratio,
-                distance: 2
+                distance: 0.5
             }
         })
     },

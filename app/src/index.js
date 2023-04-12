@@ -1,11 +1,20 @@
 import { graphic } from "./graphic/graphic"
 import { game } from "./game"
 import { authenticateUser } from "./db/auth"
+import { initDB } from "./db/init"
 
-let startBtn = document.getElementById("start-btn")
+let startSingleBtn = document.getElementById("start-single-btn")
+let startMultiBtn = document.getElementById("start-multi-btn")
 
-startBtn.onclick = function () {
+startSingleBtn.onclick = function () {
+    game.mode = "singleplayer"
     initializeGame()
+}
+startMultiBtn.onclick = function () {
+    game.mode = "multiplayer"
+    initDB().
+    then(() => authenticateUser()).
+    catch((error) => console.log(error))
 }
 
 export function initializeGame() {
@@ -19,30 +28,3 @@ export function initializeGame() {
     // start the game
     game.start()
 }
-
-authenticateUser()
-
-// let camX = 0.1, camW = 10
-// let chunkX = -128
-// console.log(Math.floor((camX - chunkX) / 128))
-// console.log(Math.floor((camX + camW - chunkX) / 128))
-
-// camX = -0.1
-// console.log(Math.floor((camX - chunkX) / 128))
-// console.log(Math.floor((camX + camW - chunkX) / 128))
-
-// camX = -128.1
-// console.log(Math.floor((camX - chunkX) / 128))
-// console.log(Math.floor((camX + camW - chunkX) / 128))
-
-// camX = -138.1
-// console.log(Math.floor((camX - chunkX) / 128))
-// console.log(Math.floor((camX + camW - chunkX) / 128))
-
-// camX = 127.9 - chunkX
-// console.log(Math.floor((camX - chunkX) / 128))
-// console.log(Math.floor((camX + camW - chunkX) / 128))
-
-// camX = 128.01 - chunkX
-// console.log(Math.floor((camX - chunkX) / 128))
-// console.log(Math.floor((camX + camW - chunkX) / 128))

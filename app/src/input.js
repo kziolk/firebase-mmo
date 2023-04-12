@@ -1,9 +1,13 @@
 import { graphic } from "./graphic/graphic"
 import { mobsManager } from "./entities/mobs/mobsManager"
 import { player } from "./entities/player"
+import { menu } from "./menu"
 
 export var input = {
-    currentMode: "player_control",
+    mode: null,
+    setMode(modeName) {
+        this.mode = modes[modeName]
+    },
     mouse: {
         pos: {x: -1, y: -1},
         pressingLeft: false,
@@ -16,40 +20,35 @@ export var input = {
         pressingDown: false
     },
     init() {
-        // keyboard 
+        // init keyboard input 
         initKeyBinds()
-        addEventListener("keydown", function(e) {
-            // if pressed keycode is in hashmap then run method
-            const actionKey = mode[input.currentMode].keyBinds[e.code];
-            const handleInput = mode[input.currentMode].keyDown[actionKey];
+        this.mode = modes.player_control
+        addEventListener("keydown", function(keyEvent) {
+            // if hashmap contains code of pressed key then run associated method
+            const methodName = input.mode.keyBinds[keyEvent.code];
+            const handleInput = input.mode.keyDown[methodName];
             if(handleInput) handleInput();
         })
-        addEventListener("keyup", function(e) {
-            const actionKey = mode[input.currentMode].keyBinds[e.code];
-            const handleInput = mode[input.currentMode].keyUp[actionKey];
+        addEventListener("keyup", function(keyEvent) {
+            const methodName = input.mode.keyBinds[keyEvent.code];
+            const handleInput = input.mode.keyUp[methodName];
             if(handleInput) handleInput();
         })
 
-        // mouse
-        addEventListener("mousemove", function(e) {
-           input.mouse.pos.x = e.x - graphic.screen.x
-           input.mouse.pos.y = e.y - graphic.screen.y
+        // init mouse input
+        addEventListener("mousemove", function(mouseEvent) {
+            const handleMouse = input.mode.mouseMove
+            if(handleMouse) handleMouse(mouseEvent)
         }, { passive: false })
-        addEventListener("mousedown", function(e) {
-            if (e.button == 0) {
-                input.mouse.pressingLeft = true;
-                player.attackTriggered = true;
-            }
-            else if (e.button == 1)
-                input.mouse.pressingRight = true;
+        addEventListener("mousedown", function(mouseEvent) {
+            const handleMouse = input.mode.mouseDown
+            if(handleMouse) handleMouse(mouseEvent)
         }, { passive: false })
-        addEventListener("mouseup", function(e) {
-            if (e.button == 0)
-                input.mouse.pressingLeft = false;
-            else if (e.button == 1)
-                input.mouse.pressingRight = false;
+        addEventListener("mouseup", function(mouseEvent) {
+            const handleMouse = input.mode.mouseUp
+            if(handleMouse) handleMouse(mouseEvent)
         }, { passive: false })
-        addEventListener("wheel", function(e) {
+        addEventListener("wheel", function(mouseEvent) {
             // let d = e.deltaY / Math.abs(e.deltaY);
             // eq.selectedSlot = (eq.size + eq.selectedSlot + d) % eq.size;
         })
@@ -59,7 +58,7 @@ export var input = {
 
 
 // key value hashmap for methods associated with keybinds
-const mode = {
+const modes = {
     player_control: {
         keyBinds: {}, // to initialize
         keyDown: {
@@ -72,6 +71,9 @@ const mode = {
                     x: player.pos.x + Math.random() * 10 - 5,
                     y: player.pos.y + Math.random() * 10 - 5 
                 });
+            },
+            openMenu: function () {
+                menu.open()
             }
         },
         keyUp: {
@@ -79,14 +81,44 @@ const mode = {
             right: function () { input.keyboard.pressingRight = false },
             down: function () { input.keyboard.pressingDown = false },
             up: function () { input.keyboard.pressingUp = false }
+        },
+        mouseMove: function(mouseEvent) {
+            // save mouse position relative to the canvas
+           input.mouse.pos.x = mouseEvent.x - graphic.screen.x
+           input.mouse.pos.y = mouseEvent.y - graphic.screen.y
+        },
+        mouseDown: function(mouseEvent){
+            if (mouseEvent.button == 0) {
+                input.mouse.pressingLeft = true;
+                player.attackTriggered = true;
+            }
+            else if (mouseEvent.button == 1)
+                input.mouse.pressingRight = true;
+        },
+        mouseUp: function(mouseEvent) {
+            if (mouseEvent.button == 0)
+                input.mouse.pressingLeft = false;
+            else if (mouseEvent.button == 1)
+                input.mouse.pressingRight = false;
         }
+    },
+    menu: {
+        keyBinds: {
+            Escape: "closeMenu"
+        },
+        keyDown: {
+            closeMenu: function() { menu.close() }
+        },
+        keyUp: {}
     }
 }
 
+// associate key code to the method
 function initKeyBinds() {
-    mode.player_control.keyBinds["KeyA"] = "left";
-    mode.player_control.keyBinds["KeyD"] = "right";
-    mode.player_control.keyBinds["KeyW"] = "up";
-    mode.player_control.keyBinds["KeyS"] = "down";
-    mode.player_control.keyBinds["Space"] = "spawnMob";
+    modes.player_control.keyBinds["KeyA"] = "left";
+    modes.player_control.keyBinds["KeyD"] = "right";
+    modes.player_control.keyBinds["KeyW"] = "up";
+    modes.player_control.keyBinds["KeyS"] = "down";
+    modes.player_control.keyBinds["Space"] = "spawnMob";
+    modes.player_control.keyBinds["Escape"] = "openMenu";
 }
