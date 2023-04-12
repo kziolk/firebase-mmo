@@ -5,7 +5,9 @@ import { mobsManager } from "./entities/mobs/mobsManager"
 import { input } from "./input"
 import { player } from "./entities/player"
 import { terrain } from "./terrain"
-import { gameDB } from "./db/gameDB"
+import { database } from "./db/gameDatabase"
+import { playersManager } from "./entities/playersManager"
+import { startPlayersListener } from "./db/players"
 
 let loop
 let oldTime, dt
@@ -20,6 +22,8 @@ export const game = {
         // initialize components
         input.init();
         terrain.init()
+        
+        startPlayersListener()
 
         player.init({x: 50, y: 30})
 
@@ -55,8 +59,10 @@ function update() {
     player.updateMovement(dt)
     mobsManager.updateMovement(dt)
 
+    playersManager.updateMovement(dt)
+
     // save changes to DB
-    //gameDB.update()
+    database.update()
 
     // graphic / performance info update
     cam.update()
@@ -68,6 +74,7 @@ function draw() {
     ctx.fillRect(0, 0, cnv.width, cnv.height)
     terrain.draw()
     mobsManager.draw()
+    playersManager.draw()
     player.draw()
     drawCoords()
     cam.draw()

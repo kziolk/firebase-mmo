@@ -1,3 +1,4 @@
+import { dbUpdater } from "../db/gameDatabase"
 import { player } from "../entities/player"
 
 export const combat = {
@@ -14,5 +15,26 @@ export const combat = {
             vy: dy * ratio,
             distance: 2
         }
+    },
+    applyKnockbackOnOtherPlayer(p, entityId) {
+        // distance from player
+        let dx = p.pos.x - player.pos.x
+        let dy = p.pos.y - player.pos.y
+        let dist = Math.sqrt(dx*dx + dy*dy)
+        let ratio = 4 / dist // make mob fly 4 meters per sec
+
+        dbUpdater.tasks.push({
+            action: "set",
+            where: `2_0/playersStates/${entityId}`,
+            val: {
+                type: "knockback",
+                vx: dx * ratio,
+                vy: dy * ratio,
+                distance: 2
+            }
+        })
+    },
+    applyStateOnPlayer(state) {
+        player.state = state
     }
 }

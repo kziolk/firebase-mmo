@@ -5,10 +5,8 @@ import { input } from "../input";
 import { MovingEntity, vectorUpdateKnockback } from "./MovingEntity";
 import { Sprite } from "../graphic/sprite";
 import { mobs } from "./mobs/mobsManager";
-
-export const PLAYER_RADIUS = .4;
-export const PLAYER_REACH_DISTANCE = 1.2
-const PLAYER_SPEED = 0.004
+import { players } from "./playersManager";
+import { PLAYER_RADIUS, PLAYER_REACH_DISTANCE, PLAYER_SPEED } from "./entityConsts";
 
 class Player extends MovingEntity {
     constructor() {
@@ -22,6 +20,8 @@ class Player extends MovingEntity {
         this.weapon = new Weapon(this)
         this.attackTriggered = false
         this.sprite = new Sprite()
+
+        this.activity = "idle_down"
     }
 
     init(pos) {
@@ -32,7 +32,7 @@ class Player extends MovingEntity {
     updateActions(dt) {
         updatePlayerReachPoint()
         if (this.attackTriggered) {
-            this.weapon.attack(mobs)
+            this.weapon.attack(mobs, players)
             this.attackTriggered = false
         }
     }
@@ -51,23 +51,22 @@ class Player extends MovingEntity {
         if (Math.abs(dx) > Math.abs(dy)) {
             // left or right
             if (dx > 0) {
-                if (this.v.x || this.v.y) this.sprite.setAnimation("walking_right")
-                else this.sprite.setAnimation("idle_right")
-            } 
-            else {
-                if (this.v.x || this.v.y) this.sprite.setAnimation("walking_left")
-                else this.sprite.setAnimation("idle_left")
+                if (this.v.x || this.v.y) this.activity = "walking_right"
+                else this.activity = "idle_right"
+            } else {
+                if (this.v.x || this.v.y) this.activity = "walking_left"
+                else this.activity = "idle_left"
             }
         } else {
             if (dy > 0) {
-                if (this.v.x || this.v.y) this.sprite.setAnimation("walking_down")
-                else this.sprite.setAnimation("idle_down")
-            }
-            else {
-                if (this.v.x || this.v.y) this.sprite.setAnimation("walking_up")
-                else this.sprite.setAnimation("idle_up")
+                if (this.v.x || this.v.y) this.activity = "walking_down"
+                else this.activity = "idle_down"
+            } else {
+                if (this.v.x || this.v.y) this.activity = "walking_up"
+                else this.activity = "idle_up"
             }
         }
+        this.sprite.setAnimation(this.activity)
 
         this.sprite.updatePos(this.pos)
         this.sprite.draw()

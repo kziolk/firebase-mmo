@@ -2,10 +2,7 @@ import { cam } from "../../graphic/camera"
 import { ctx } from "../../graphic/graphic"
 import { player } from "../player"
 import { MovingEntity, vectorUpdateKnockback } from "../MovingEntity"
-export const MOB_RADIUS = 0.4
-export const MOB_RANGE = 0.6
-const MOB_SPEED = 0.002
-
+import { MOB_RADIUS, MOB_SPEED } from "../entityConsts"
 
 export class Mob extends MovingEntity {
     constructor(position) { 

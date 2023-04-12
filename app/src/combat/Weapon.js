@@ -7,7 +7,7 @@ export class Weapon {
         this.lastUseTime = 0
     }
 
-    attack(entities) {
+    attack(mobEntities, playerEntities) {
         // if player initiated attack (leftclick)
         let damageHitbox = {
             type: 'line',
@@ -18,10 +18,18 @@ export class Weapon {
             }
         }
 
-        Object.keys(entities).forEach(entityId=> {
-            let mob = entities[entityId]
-            if (collision.detect(damageHitbox, mob.hitbox)) {
-                combat.applyKnockbackOnMob(mob)
+        Object.keys(mobEntities).forEach(entityId=> {
+            let m = mobEntities[entityId]
+            if (collision.detect(damageHitbox, m.hitbox)) {
+                combat.applyKnockbackOnMob(m)
+                //delete mobs[mobId]
+            }
+        })
+
+        Object.keys(playerEntities).forEach(entityId=> {
+            let p = playerEntities[entityId]
+            if (collision.detect(damageHitbox, p.hitbox)) {
+                combat.applyKnockbackOnOtherPlayer(p, entityId)
                 //delete mobs[mobId]
             }
         })

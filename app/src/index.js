@@ -1,6 +1,6 @@
 import { graphic } from "./graphic/graphic"
 import { game } from "./game"
-//import { authenticateUser } from "./db/auth"
+import { authenticateUser } from "./db/auth"
 
 let startBtn = document.getElementById("start-btn")
 
@@ -20,4 +20,4 @@ export function initializeGame() {
     game.start()
 }
 
-//authenticateUser()
+authenticateUser()

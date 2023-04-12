@@ -1,22 +1,31 @@
-import { PLAYER_RADIUS } from "./player"
+import { cam } from "../graphic/camera";
+import { ctx } from "../graphic/graphic"
+import { MovingEntity } from "./MovingEntity";
+import { Sprite } from "../graphic/sprite";
+import { PLAYER_RADIUS, PLAYER_SPEED } from "./entityConsts"
 
-class otherPlayer {
-    constructor(position) {
-        this.hitbox = {
-            type: "circle",
-            pos: position,
-            r: PLAYER_RADIUS
-        }
-        this.pos = this.hitbox.pos // game position
+class OtherPlayer extends MovingEntity {
+    constructor() {
+        super({
+                type: "circle",
+                pos: {x: 0, y: 0},
+                r: PLAYER_RADIUS
+            }, PLAYER_SPEED)
+        this.pos = this.hitbox.pos
         this.reachPoint = {x: 0, y: 0}
-        this.speed = 0.004      // meter per milisecond
+        this.sprite = new Sprite()
+        this.activity = "idle_down"
     }
+
     draw() {
+        this.sprite.setAnimation(this.activity)
+
+        this.sprite.updatePos(this.pos)
+        this.sprite.draw()
         // map game position to screen position
         const drawPos = cam.gamePos2ScreenPos(this.pos)
         const drawRadius = PLAYER_RADIUS * cam.config.meter2pixels 
-        ctx.fillStyle = 'white'
-        // draw player dot
+        ctx.fillStyle = 'rgba(0,255,255,0.7)'
         ctx.beginPath()
         ctx.arc(drawPos.x, drawPos.y, drawRadius, 0, Math.PI*2, true)
         ctx.fill()
@@ -38,11 +47,34 @@ class otherPlayer {
 }
 
 export const players = {}
+
 export const playersManager = {
     draw() {
         Object.keys(players).forEach(playerKey=>{
             players[playerKey].draw()
         })
+    },
+
+    updateMovement(dt) {
+        Object.keys(players).forEach(playerKey=>{
+            players[playerKey].move(dt)
+        })
+    },
+    setOtherPlayer(pKey, pVal) {
+        if (!players[pKey]) {
+            players[pKey] = new OtherPlayer()
+        }
+        let otherPlayer = players[pKey]
+        otherPlayer.pos.x = pVal.x
+        otherPlayer.pos.y = pVal.y
+        otherPlayer.v.x = pVal.vx
+        otherPlayer.v.y = pVal.vy
+        otherPlayer.activity = pVal.activity
+        otherPlayer.reachPoint.x = pVal.reachPointX
+        otherPlayer.reachPoint.y = pVal.reachPointY
+    },
+    removeOtherPlayer(pKey) {
+        delete players[pKey]
     }
 
 }

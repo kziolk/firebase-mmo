@@ -1,4 +1,4 @@
-import { PLAYER_RADIUS } from "../entities/player"
+import { PLAYER_RADIUS } from "../entities/entityConsts"
 import { ctx } from "./graphic"
 import { cam } from "./camera"
 import { timeNow } from "../game"
