@@ -27,7 +27,14 @@ class Player extends MovingEntity {
         this.attack = { lastUsed: 0 }
 
         // for animation
-        this.sprite = new ComplexSprite("player", ["arm_l", "arm_r", "legs", "torso", "head", "helmet", "sword_r"])
+        this.sprite = new ComplexSprite("player", {
+            "arm_l": "arm_l", 
+            "arm_r": "arm_r",
+            "legs": "legs", 
+            "torso": "torso", 
+            "head": "head", 
+            "helmet": "helmet"
+        })
         this.direction = "down"
         this.activity = "idle"        
     }
@@ -39,10 +46,7 @@ class Player extends MovingEntity {
 
         // init player eq
         hotbar.init()
-        this.item = hotbar.items[hotbar.selectedId]
-
-        // init player attack object
-        this.resetAttack()
+        this.initSelectedItem()
     }
 
     updateActions(dt) {
@@ -60,7 +64,7 @@ class Player extends MovingEntity {
         }
         else {
             // update debug bar indicating time remaining for combination attack
-            let attackName = playerAttackFromItemName[this.item.name]
+            let attackName = playerAttackFromItem(this.item)
             let attackStep = attacksData[attackName].steps[this.attack.step]
             if ((this.attack.step < attacksData[attackName].steps.length) && 
             (timeNow - this.attack.lastUsed - this.attack.duration < attackStep.continueWindow)) {
@@ -73,7 +77,7 @@ class Player extends MovingEntity {
                 // if trigger occurs just after last attack then maybe it's the COMBINATION???
                 // let attackName = playerAttackFromItemName[this.item.name]
                 // let attackStep = attacksData[attackName].steps[this.attack.step]
-                if ((this.attack.step < attacksData[attackName].steps.length) && 
+                if ((this.attack.step < attacksData[attackName].steps.length - 1) && 
                     (timeNow - this.attack.lastUsed - this.attack.duration < attackStep.continueWindow)) {
                     this.attack.step++
                     attackStep = attacksData[attackName].steps[this.attack.step]
@@ -160,6 +164,28 @@ class Player extends MovingEntity {
         // lastUsed cannot be reset because timer needs to remain after weapon change
         this.attack.step = 0
     }
+
+    initSelectedItem() {
+        this.item = hotbar.items[hotbar.selectedId]
+        this.resetAttack()
+        this.addItemSprite()
+    }
+
+    switchItem(slotId) {
+        this.removeItemSprite()
+        hotbar.selectedId = slotId
+        this.initSelectedItem()
+    }
+
+    addItemSprite() {
+        if (!this.item) return
+        this.sprite.setSpritePart(this.item.spritePart, this.item.name)
+    }
+
+    removeItemSprite() {
+        if (!this.item) return
+        this.sprite.removeSpritePart(this.item.spritePart)
+    }
 }
 
 export const player = new Player()
@@ -202,8 +228,9 @@ const playerVectorUpdateFoos = {
     knockback: vectorUpdateKnockback
 }
 
-const playerAttackFromItemName = {
-    default: "fist"
+function playerAttackFromItem(item) {
+    if (!item) return "fist";
+    else return item.type
 }
 
 export const playerDebugData = {

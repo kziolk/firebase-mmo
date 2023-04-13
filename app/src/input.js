@@ -26,14 +26,14 @@ export var input = {
         this.mode = modes.player_control
         addEventListener("keydown", function(keyEvent) {
             // if hashmap contains code of pressed key then run associated method
-            const methodName = input.mode.keyBinds[keyEvent.code];
-            const handleInput = input.mode.keyDown[methodName];
-            if(handleInput) handleInput();
+            const methodName = input.mode.keyBinds[keyEvent.code]
+            const handleInput = input.mode.keyDown[methodName]
+            if(handleInput) handleInput()
         })
         addEventListener("keyup", function(keyEvent) {
-            const methodName = input.mode.keyBinds[keyEvent.code];
-            const handleInput = input.mode.keyUp[methodName];
-            if(handleInput) handleInput();
+            const methodName = input.mode.keyBinds[keyEvent.code]
+            const handleInput = input.mode.keyUp[methodName]
+            if(handleInput) handleInput()
         })
 
         // init mouse input
@@ -90,21 +90,22 @@ const modes = {
         },
         mouseDown: function(mouseEvent){
             if (mouseEvent.button == 0) {
-                input.mouse.pressingLeft = true;
-                player.attack.triggered = true;
+                input.mouse.pressingLeft = true
+                player.attack.triggered = true
             }
             else if (mouseEvent.button == 1)
-                input.mouse.pressingRight = true;
+                input.mouse.pressingRight = true
         },
         mouseUp: function(mouseEvent) {
             if (mouseEvent.button == 0)
-                input.mouse.pressingLeft = false;
+                input.mouse.pressingLeft = false
             else if (mouseEvent.button == 1)
-                input.mouse.pressingRight = false;
+                input.mouse.pressingRight = false
         },
         mouseWheel: function(mouseEvent) {
-            let d = mouseEvent.deltaY / Math.abs(mouseEvent.deltaY);
-            hotbar.selectedId = (hotbar.size + hotbar.selectedId + d) % hotbar.size;
+            let delta = mouseEvent.deltaY / Math.abs(mouseEvent.deltaY)
+            let newItemId = (hotbar.size + hotbar.selectedId + delta) % hotbar.size
+            player.switchItem(newItemId)
         }
     },
     menu: {

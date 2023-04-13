@@ -164,8 +164,11 @@ function drawHotbar() {
     ctx.drawImage(imgs.gui_hotbar, hotbarX, hotbarY, hotbarW, hotbarH)
 
     for (let i = 0; i < hotbar.size; i++) {
+        let x = hotbarX + i * hotbarH
+        if (hotbar.items[i]) {
+            ctx.drawImage(imgs["item_" + hotbar.items[i].name], x, hotbarY, hotbarH, hotbarH)
+        }
         if (i == hotbar.selectedId) {
-            let x = hotbarX + i * hotbarH
             ctx.strokeStyle = "rgb(230, 230, 90)"
             ctx.lineWidth = 5
             ctx.strokeRect(x, hotbarY, hotbarH, hotbarH)
@@ -242,5 +245,11 @@ const imgData = {
     },
     gui_hotbar: {
         path: "img/gui/hotbar.png"
+    },
+    item_sword_r: {
+        path: "img/items/sword_r.png"
+    },
+    item_bow_l: {
+        path: "img/items/bow_l.png"
     }
 }

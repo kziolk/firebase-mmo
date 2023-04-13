@@ -12,8 +12,22 @@ export const attacksData = {
     fist: {
         steps: [
             { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
+            { duration: 200, baseAttack: 10, activity: "kick", continueWindow: 500 }
+        ]
+    },
+    sword: {
+        steps: [
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
             { duration: 200, baseAttack: 10, activity: "kick", continueWindow: 500 },
-            { duration: 400, baseAttack: 10, activity: "360" }
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
+            { duration: 500, baseAttack: 10, activity: "kick", continueWindow: 500 }
+        ]
+    },
+    bow: {
+        steps: [
+            { duration: 100, baseAttack: 10, activity: "360" }
         ]
     }
 }
