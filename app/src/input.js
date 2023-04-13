@@ -2,6 +2,7 @@ import { graphic } from "./graphic/graphic"
 import { mobsManager } from "./entities/mobs/mobsManager"
 import { player } from "./entities/player"
 import { menu } from "./menu"
+import { hotbar } from "./eq"
 
 export var input = {
     mode: null,
@@ -38,19 +39,19 @@ export var input = {
         // init mouse input
         addEventListener("mousemove", function(mouseEvent) {
             const handleMouse = input.mode.mouseMove
-            if(handleMouse) handleMouse(mouseEvent)
+            if (handleMouse) handleMouse(mouseEvent)
         }, { passive: false })
         addEventListener("mousedown", function(mouseEvent) {
             const handleMouse = input.mode.mouseDown
-            if(handleMouse) handleMouse(mouseEvent)
+            if (handleMouse) handleMouse(mouseEvent)
         }, { passive: false })
         addEventListener("mouseup", function(mouseEvent) {
             const handleMouse = input.mode.mouseUp
-            if(handleMouse) handleMouse(mouseEvent)
+            if (handleMouse) handleMouse(mouseEvent)
         }, { passive: false })
         addEventListener("wheel", function(mouseEvent) {
-            // let d = e.deltaY / Math.abs(e.deltaY);
-            // eq.selectedSlot = (eq.size + eq.selectedSlot + d) % eq.size;
+            const handleMouse = input.mode.mouseWheel
+            if (handleMouse) handleMouse(mouseEvent)
         })
     }
 }
@@ -90,7 +91,7 @@ const modes = {
         mouseDown: function(mouseEvent){
             if (mouseEvent.button == 0) {
                 input.mouse.pressingLeft = true;
-                player.attackTriggered = true;
+                player.attack.triggered = true;
             }
             else if (mouseEvent.button == 1)
                 input.mouse.pressingRight = true;
@@ -100,6 +101,10 @@ const modes = {
                 input.mouse.pressingLeft = false;
             else if (mouseEvent.button == 1)
                 input.mouse.pressingRight = false;
+        },
+        mouseWheel: function(mouseEvent) {
+            let d = mouseEvent.deltaY / Math.abs(mouseEvent.deltaY);
+            hotbar.selectedId = (hotbar.size + hotbar.selectedId + d) % hotbar.size;
         }
     },
     menu: {
@@ -115,10 +120,20 @@ const modes = {
 
 // associate key code to the method
 function initKeyBinds() {
-    modes.player_control.keyBinds["KeyA"] = "left";
-    modes.player_control.keyBinds["KeyD"] = "right";
-    modes.player_control.keyBinds["KeyW"] = "up";
-    modes.player_control.keyBinds["KeyS"] = "down";
-    modes.player_control.keyBinds["Space"] = "spawnMob";
-    modes.player_control.keyBinds["Escape"] = "openMenu";
+    modes.player_control.keyBinds["KeyA"] = "left"
+    modes.player_control.keyBinds["KeyD"] = "right"
+    modes.player_control.keyBinds["KeyW"] = "up"
+    modes.player_control.keyBinds["KeyS"] = "down"
+    modes.player_control.keyBinds["Space"] = "spawnMob"
+    modes.player_control.keyBinds["Escape"] = "openMenu"
+
+    for (let i = 1; i <= 9; i++)
+        modes.player_control.keyBinds["Digit" + i] = "select" + i
+    
+    for (let i = 1; i <= 9; i++)
+        modes.player_control.keyDown["select" + i] = function () {
+            hotbar.selectedId = i - 1
+        }
+
+
 }

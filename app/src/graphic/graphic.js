@@ -2,9 +2,12 @@ import { cam } from "./camera"
 import { debugInfo } from "../dbg"
 import { mobs } from "../entities/mobs/mobsManager"
 import { input } from "../input"
-import { player } from "../entities/player"
+import { player, playerDebugData } from "../entities/player"
 import { CHUNK_SIZE, terrain } from "../terrain"
 import { players } from "../entities/playersManager"
+import { hotbar } from "../eq"
+import { PLAYER_RADIUS } from "../entities/entityConsts"
+import { timeNow } from "../game"
 
 export const cnv = document.getElementById("game-container")
 export const ctx = cnv.getContext('2d')
@@ -36,6 +39,12 @@ export const graphic = {
 
         // tiles and entities between tiles
         drawTerrain()
+
+        //for debug
+        drawPlayerAttackBars()
+
+        //hotbar
+        drawHotbar()
 
         // debug info
         drawCoords()
@@ -124,6 +133,46 @@ function drawTerrain() {
     }
 }
 
+function drawPlayerAttackBars() {
+    if (player.occupied) {
+        let barX = player.pos.x - PLAYER_RADIUS
+        let barY = player.pos.y - PLAYER_RADIUS
+        let barH = PLAYER_RADIUS * 2 * playerDebugData.attackDurationBar
+        barY += PLAYER_RADIUS * 2 - barH
+        let barDrawPos = cam.gamePos2ScreenPos({x: barX, y: barY})
+        ctx.fillStyle = "red"
+        ctx.fillRect(barDrawPos.x - 30, barDrawPos.y, 20, barH * cam.config.meter2pixels)
+    } else if (playerDebugData.attackCombinationWindowBar) {
+        let barX = player.pos.x - PLAYER_RADIUS
+        let barY = player.pos.y - PLAYER_RADIUS
+        let barH = PLAYER_RADIUS * 2 * (1 - playerDebugData.attackCombinationWindowBar)
+        barY += PLAYER_RADIUS * 2 - barH
+        let barDrawPos = cam.gamePos2ScreenPos({x: barX, y: barY})
+        ctx.fillStyle = "yellow"
+        ctx.fillRect(barDrawPos.x - 30, barDrawPos.y, 20, barH * cam.config.meter2pixels)
+    }
+}
+
+function drawHotbar() {
+    let hotbarW = cnv.width / 2
+    let hotbarH = cnv.width / 18
+    let hotbarX = cnv.width / 4
+    let hotbarY = cnv.height - 1.5 * hotbarH
+
+    ctx.fillStyle = "rgba(100, 50, 0, 0.7)"
+    ctx.fillRect(hotbarX, hotbarY, hotbarW, hotbarH)
+    ctx.drawImage(imgs.gui_hotbar, hotbarX, hotbarY, hotbarW, hotbarH)
+
+    for (let i = 0; i < hotbar.size; i++) {
+        if (i == hotbar.selectedId) {
+            let x = hotbarX + i * hotbarH
+            ctx.strokeStyle = "rgb(230, 230, 90)"
+            ctx.lineWidth = 5
+            ctx.strokeRect(x, hotbarY, hotbarH, hotbarH)
+        }
+    }
+}   
+
 function drawCoords() {
     ctx.fillStyle = 'yellow'
     ctx.font = "20px Arial";
@@ -190,5 +239,8 @@ const imgData = {
         offY: 1 - 50/32,
         scaleY: 50 / 32,
         scaleX: 1
+    },
+    gui_hotbar: {
+        path: "img/gui/hotbar.png"
     }
 }

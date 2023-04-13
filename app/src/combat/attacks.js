@@ -1,20 +1,32 @@
 import { collision } from "../physics/collision"
 import { combat } from "./combat"
 
-export class Weapon {
-    constructor(wielder) {
-        this.wielder = wielder
-        this.lastUseTime = 0
+export const attacks = {
+    use(wielder, mobEntities, playerEntities) {
+        const executeAttack = attackFoos[wielder.attack.name]
+        if (executeAttack) executeAttack(wielder, mobEntities, playerEntities)
     }
+}
 
-    attack(mobEntities, playerEntities) {
+export const attacksData = {
+    fist: {
+        steps: [
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
+            { duration: 200, baseAttack: 10, activity: "kick", continueWindow: 500 },
+            { duration: 400, baseAttack: 10, activity: "360" }
+        ]
+    }
+}
+
+const attackFoos = {
+    fist: function (wielder, mobEntities, playerEntities) {
         // if player initiated attack (leftclick)
         let damageHitbox = {
             type: 'line',
-            p1: this.wielder.reachPoint,
+            p1: wielder.reachPoint,
             p2: { 
-                x: (this.wielder.pos.x + this.wielder.reachPoint.x) / 2,
-                y: (this.wielder.pos.y + this.wielder.reachPoint.y) / 2
+                x: (wielder.pos.x + wielder.reachPoint.x) / 2,
+                y: (wielder.pos.y + wielder.reachPoint.y) / 2
             }
         }
 
@@ -34,5 +46,4 @@ export class Weapon {
             }
         })
     }
-
 }

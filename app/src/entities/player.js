@@ -1,12 +1,14 @@
-import { cam } from "../graphic/camera";
+import { cam } from "../graphic/camera"
 import { ctx } from "../graphic/graphic"
-import { Weapon } from "../combat/Weapon";
-import { input } from "../input";
-import { MovingEntity, vectorUpdateKnockback } from "./MovingEntity";
-import { Sprite } from "../graphic/sprite";
-import { mobs } from "./mobs/mobsManager";
-import { players } from "./playersManager";
-import { PLAYER_RADIUS, PLAYER_REACH_DISTANCE, PLAYER_SPEED } from "./entityConsts";
+import { attacks, attacksData } from "../combat/attacks"
+import { input } from "../input"
+import { MovingEntity, vectorUpdateKnockback } from "./MovingEntity"
+import { Sprite, animations } from "../graphic/sprite"
+import { mobs } from "./mobs/mobsManager"
+import { players } from "./playersManager"
+import { PLAYER_RADIUS, PLAYER_REACH_DISTANCE, PLAYER_SPEED } from "./entityConsts"
+import { hotbar } from "../eq"
+import { timeNow } from "../game"
 
 class Player extends MovingEntity {
     constructor() {
@@ -15,60 +17,122 @@ class Player extends MovingEntity {
                 pos: {x: 0, y: 0},
                 r: PLAYER_RADIUS
             }, PLAYER_SPEED)
+        // player position in game coords, reference to hitbox postition
         this.pos = this.hitbox.pos
+        // point under player mouse
         this.reachPoint = {x: 0, y: 0}
-        this.weapon = new Weapon(this)
-        this.attackTriggered = false
-        this.sprite = new Sprite()
+        // is player stunned / during attack animation
+        this.occupied = false
+        // tracking attack related data
+        this.attack = { lastUsed: 0 }
 
-        this.activity = "idle_down"
+        // for animation
+        this.sprite = new Sprite()
+        this.direction = "down"
+        this.activity = "idle"        
     }
 
     init(pos) {
+        // init player position from db
         this.pos.x = pos.x
         this.pos.y = pos.y
+
+        // init player eq
+        hotbar.init()
+        this.item = hotbar.items[hotbar.selectedId]
+
+        // init player attack object
+        this.resetAttack()
     }
 
     updateActions(dt) {
         updatePlayerReachPoint()
-        if (this.attackTriggered) {
-            this.weapon.attack(mobs, players)
-            this.attackTriggered = false
+        if (this.occupied) {
+            // debug: ratio of completing attack action
+            playerDebugData.attackDurationBar = (timeNow - this.attack.lastUsed) / this.attack.duration
+            // if attack in the middle of animation then attack
+
+            // set occupied to false eventually
+            if (timeNow - this.attack.lastUsed > this.attack.duration) {
+                this.occupied = false
+                this.attack.triggered = false // if mouse clicked during animation
+            }
+        }
+        else {
+            // update debug bar indicating time remaining for combination attack
+            let attackName = playerAttackFromItemName[this.item.name]
+            let attackStep = attacksData[attackName].steps[this.attack.step]
+            if ((this.attack.step < attacksData[attackName].steps.length) && 
+            (timeNow - this.attack.lastUsed - this.attack.duration < attackStep.continueWindow)) {
+                playerDebugData.attackCombinationWindowBar = (timeNow - this.attack.lastUsed - this.attack.duration) / attackStep.continueWindow
+            } else {
+                playerDebugData.attackCombinationWindowBar = 0
+            }
+            // update attack
+            if (this.attack.triggered) {
+                // if trigger occurs just after last attack then maybe it's the COMBINATION???
+                // let attackName = playerAttackFromItemName[this.item.name]
+                // let attackStep = attacksData[attackName].steps[this.attack.step]
+                if ((this.attack.step < attacksData[attackName].steps.length) && 
+                    (timeNow - this.attack.lastUsed - this.attack.duration < attackStep.continueWindow)) {
+                    this.attack.step++
+                    attackStep = attacksData[attackName].steps[this.attack.step]
+                    // debug: ratio of time last for combination attack
+                    playerDebugData.attackCombinationWindowBar = (timeNow - this.attack.lastUsed - this.attack.duration) / attackStep.continueWindow
+                } else {
+                    this.attack.step = 0
+                    attackStep = attacksData[attackName].steps[this.attack.step]
+                    // debug: ratio of time last for combination attack
+                    playerDebugData.attackCombinationWindowBar = 0
+                }
+
+                // weapon.attack(this, mobs, players)
+                this.occupied = true
+                this.activity = attackStep.activity
+                this.attack.duration = attackStep.duration
+                this.attack.lastUsed = timeNow
+                let animationName = this.activity + "_" + this.direction
+                let animationFrameDuration = this.attack.duration / animations.player[animationName].frameCount
+                this.sprite.resetAnimation(animationName, animationFrameDuration)
+                this.attack.triggered = false
+            }
+
+            // update breaking blocks
+
+            // update item special ability (placing blocks and more)
         }
     }
 
     updateMovement(dt) {
-        updatePlayerVelocityVector(dt)
+        if(this.occupied == false)
+            updatePlayerVelocityVector(dt)
         // move by velocity
         this.move(dt)
     }
 
     draw() {
-        // set animation
-        let dx = this.reachPoint.x - this.pos.x
-        let dy = this.reachPoint.y - this.pos.y
-        if (Math.abs(dx) > Math.abs(dy)) {
-            // left or right
-            if (dx > 0) {
-                if (this.v.x || this.v.y) this.activity = "walking_right"
-                else this.activity = "idle_right"
+        // set animation when not busy doing something else
+        if (this.occupied == false) {
+            // choose direction based on mouse distance from player
+            let dx = this.reachPoint.x - this.pos.x
+            let dy = this.reachPoint.y - this.pos.y
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // bigger distance horisontally means left or right
+                if (dx > 0) this.direction = "right"
+                else this.direction = "left"
             } else {
-                if (this.v.x || this.v.y) this.activity = "walking_left"
-                else this.activity = "idle_left"
+                if (dy > 0) this.direction = "down"
+                else this.direction = "up"
             }
-        } else {
-            if (dy > 0) {
-                if (this.v.x || this.v.y) this.activity = "walking_down"
-                else this.activity = "idle_down"
-            } else {
-                if (this.v.x || this.v.y) this.activity = "walking_up"
-                else this.activity = "idle_up"
-            }
+            // choose activity based on
+            if (this.v.x || this.v.y) this.activity = "walking"
+            else this.activity = "idle"
+            this.sprite.setAnimation(this.activity + "_" + this.direction)
         }
-        this.sprite.setAnimation(this.activity)
-
+        // draw sprite
         this.sprite.updatePos(this.pos)
         this.sprite.draw()
+        // draw hitbox, mouse dot and reach line
         // map game position to screen position
         const drawPos = cam.gamePos2ScreenPos(this.pos)
         const drawRadius = PLAYER_RADIUS * cam.config.meter2pixels 
@@ -78,18 +142,23 @@ class Player extends MovingEntity {
         ctx.fill()
 
         // map player reach position
-        const drawReachPoint = cam.gamePos2ScreenPos(this.reachPoint)
+        const reachPointDrawPos = cam.gamePos2ScreenPos(this.reachPoint)
         ctx.fillStyle = '#00ff00'
         ctx.beginPath()
-        ctx.arc(drawReachPoint.x, drawReachPoint.y, 5, 0, Math.PI*2, true)
+        ctx.arc(reachPointDrawPos.x, reachPointDrawPos.y, 5, 0, Math.PI*2, true)
         ctx.fill()
 
         // draw reach line
         ctx.strokeStyle = '#00ff00'
         ctx.beginPath()
         ctx.moveTo(drawPos.x, drawPos.y)
-        ctx.lineTo(drawReachPoint.x, drawReachPoint.y)
+        ctx.lineTo(reachPointDrawPos.x, reachPointDrawPos.y)
         ctx.stroke()
+    }
+
+    resetAttack() {
+        // lastUsed cannot be reset because timer needs to remain after weapon change
+        this.attack.step = 0
     }
 }
 
@@ -131,4 +200,13 @@ const playerVectorUpdateFoos = {
         else player.v.y = 0
     },
     knockback: vectorUpdateKnockback
+}
+
+const playerAttackFromItemName = {
+    default: "fist"
+}
+
+export const playerDebugData = {
+    attackDurationBar: 0,
+    attackCombinationWindowBar: 0
 }

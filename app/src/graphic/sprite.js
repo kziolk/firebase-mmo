@@ -5,21 +5,36 @@ import { timeNow } from "../game"
 
 const PIXELS_PER_METER = 32
 
+const pathToEntity = {
+    "player": "img/entities/player.png",
+    "mob": "img/entities/mob.png"
+}
+
 export class Sprite {
-    constructor() {
+    constructor(entityName) {
+        this.entityName = entityName
         this.image = new Image()
-        this.image.src = "img/entities/player.png"
+        this.image.src = pathToEntity[entityName]
         this.pos = {x: 0, y: 0}
         this.gameWidth = 1
         this.gameHeight = 1
 
         this.lastAnimationTimeStamp = 0
         this.animationFrame = 0
-        this.animation = animations["player"]["walking_down"]
+        this.animation = animations[entityName]["walking_down"]
+        this.frameDuration = 200
     }
 
-    setAnimation(animationName) {
-        this.animation = animations["player"][animationName]
+    setAnimation(animationName, frameDuration = 200) {
+        this.animation = animations[entityName][animationName]
+        this.frameDuration = frameDuration
+    }
+
+    resetAnimation(animationName, frameDuration = 200) {
+        this.animationFrame = 0
+        this.animation = animations[entityName][animationName]
+        this.frameDuration = frameDuration
+        this.lastAnimationTimeStamp = timeNow
     }
 
     updatePos(pos) {
@@ -31,7 +46,7 @@ export class Sprite {
     }
 
     animate() {
-        if (timeNow - this.lastAnimationTimeStamp > 200) {
+        if (timeNow - this.lastAnimationTimeStamp > this.frameDuration) {
             this.animationFrame = (this.animationFrame+1) % this.animation.frameCount
             this.lastAnimationTimeStamp = timeNow
         }
@@ -54,7 +69,7 @@ export class Sprite {
 }
 
 
-const animations = {
+export const animations = {
     player: {
         walking_down: {
             x: 0,
@@ -115,6 +130,46 @@ const animations = {
             x: 128,
             y: 96,
             frameCount: 1
+        },
+        kick_down: {
+            x: 160,
+            y: 0,
+            frameCount: 1
+        },
+        kick_right: {
+            x: 160,
+            y: 32,
+            frameCount: 1
+        },
+        kick_left: {
+            x: 160,
+            y: 64,
+            frameCount: 1
+        },
+        kick_up: {
+            x: 160,
+            y: 96,
+            frameCount: 1
+        },
+        "360_down": {
+            x: 192,
+            y: 0,
+            frameCount: 4
+        },
+        "360_right": {
+            x: 192,
+            y: 32,
+            frameCount: 4
+        },
+        "360_left": {
+            x: 192,
+            y: 64,
+            frameCount: 4
+        },
+        "360_up": {
+            x: 192,
+            y: 96,
+            frameCount: 4
         }
     }
 }
