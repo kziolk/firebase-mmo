@@ -1,7 +1,7 @@
 import { cam } from "../graphic/camera";
 import { ctx } from "../graphic/graphic"
 import { MovingEntity } from "./MovingEntity";
-import { Sprite } from "../graphic/sprite";
+import { ComplexSprite } from "../graphic/sprite";
 import { PLAYER_RADIUS, PLAYER_SPEED } from "./entityConsts"
 
 class OtherPlayer extends MovingEntity {
@@ -13,7 +13,7 @@ class OtherPlayer extends MovingEntity {
             }, PLAYER_SPEED)
         this.pos = this.hitbox.pos
         this.reachPoint = {x: 0, y: 0}
-        this.sprite = new Sprite()
+        this.sprite = new ComplexSprite()
         this.activity = "idle_down"
     }
 

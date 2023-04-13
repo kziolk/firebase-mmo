@@ -5,44 +5,64 @@ import { timeNow } from "../game"
 
 const PIXELS_PER_METER = 32
 
-const pathToEntity = {
-    "player": "img/entities/player.png",
-    "mob": "img/entities/mob.png"
+const pathToSprite = {
+    //"player": "img/entities/player_sprite_wip.png",
+    //"mob": "img/entities/mob.png",
+    // bodyparts
+    "head": "img/entities/armor/head.png",
+    "arm_r": "img/entities/armor/arm_r.png",
+    "arm_l": "img/entities/armor/arm_l.png", 
+    "legs": "img/entities/armor/legs.png", 
+    "torso": "img/entities/armor/torso.png",
+
+    // armor
+    "helmet": "img/entities/armor/helmet.png",
+
+    // weapons
+    "sword_r": "img/entities/armor/sword_r.png"
 }
 
-export class Sprite {
-    constructor(entityName) {
+export class ComplexSprite {
+    constructor(entityName, bodyParts) {
+        this.sprites = {}
+        bodyParts.forEach(bodyPart => {
+            this.sprites[bodyPart] = {
+                img: new Image(),
+                pos: {x: 0, y: 0},
+                gameWidth: 1,
+                gameHeight: 1,
+            }
+            this.sprites[bodyPart].img.src = pathToSprite[bodyPart]
+        });
         this.entityName = entityName
-        this.image = new Image()
-        this.image.src = pathToEntity[entityName]
-        this.pos = {x: 0, y: 0}
-        this.gameWidth = 1
-        this.gameHeight = 1
-
         this.lastAnimationTimeStamp = 0
         this.animationFrame = 0
-        this.animation = animations[entityName]["walking_down"]
+        this.animation = animations[this.entityName]["walking_down"]
         this.frameDuration = 200
     }
 
     setAnimation(animationName, frameDuration = 200) {
-        this.animation = animations[entityName][animationName]
+        this.animation = animations[this.entityName][animationName]
         this.frameDuration = frameDuration
     }
 
     resetAnimation(animationName, frameDuration = 200) {
         this.animationFrame = 0
-        this.animation = animations[entityName][animationName]
+        this.animation = animations[this.entityName][animationName]
         this.frameDuration = frameDuration
         this.lastAnimationTimeStamp = timeNow
     }
 
     updatePos(pos) {
-        const adjustedPos = cam.gamePos2ScreenPos({
-            x: pos.x - this.gameWidth / 2, 
-            y: pos.y - this.gameHeight + PLAYER_RADIUS})
-        this.pos.x = adjustedPos.x
-        this.pos.y = adjustedPos.y
+        Object.keys(this.sprites).forEach(bodyPart => {
+            let sprite = this.sprites[bodyPart]
+            const adjustedPos = cam.gamePos2ScreenPos({
+                x: pos.x - sprite.gameWidth / 2, 
+                y: pos.y - sprite.gameHeight + PLAYER_RADIUS})
+            sprite.pos = adjustedPos
+        })
+        // this.pos.x = adjustedPos.x
+        // this.pos.y = adjustedPos.y
     }
 
     animate() {
@@ -54,17 +74,22 @@ export class Sprite {
 
     draw() {
         this.animate()
-        ctx.drawImage(
-            this.image,
-            this.animation.x + 32 * this.animationFrame,
-            this.animation.y,
-            32,
-            32,
-            this.pos.x,
-            this.pos.y,
-            cam.config.meter2pixels * this.gameWidth,
-            cam.config.meter2pixels * this.gameHeight
-        )
+        this.animation.drawOrder.forEach(bodyName => {
+            let sprite = this.sprites[bodyName]
+            if (sprite) {
+                ctx.drawImage(
+                    sprite.img,
+                    this.animation.x + 32 * this.animationFrame,
+                    this.animation.y,
+                    32,
+                    32,
+                    sprite.pos.x,
+                    sprite.pos.y,
+                    cam.config.meter2pixels * sprite.gameWidth,
+                    cam.config.meter2pixels * sprite.gameHeight
+                )
+            }
+        })
     }
 }
 
@@ -74,42 +99,66 @@ export const animations = {
         walking_down: {
             x: 0,
             y: 0,
-            frameCount: 4
+            frameCount: 4,
+            drawOrder: [
+                "arm_l", "legs", "torso", "head", "helmet", "sword_r", "arm_r"
+            ]
         },
         walking_right: {
             x: 0,
             y: 32,
-            frameCount: 4
+            frameCount: 4,
+            drawOrder: [
+                "arm_l", "legs", "torso", "head", "helmet", "sword_r", "arm_r"
+            ]
         },
         walking_left: {
             x: 0,
             y: 64,
-            frameCount: 4
+            frameCount: 4,
+            drawOrder: [
+                "sword_r", "arm_r", "legs", "torso", "arm_l", "head", "helmet"
+            ]
         },
         walking_up: {
             x: 0,
             y: 96,
-            frameCount: 4
+            frameCount: 4,
+            drawOrder: [
+                "arm_l", "legs", "torso", "head", "helmet", "sword_r", "arm_r"
+            ]
         },
         idle_down: {
             x: 0,
             y: 0,
-            frameCount: 1
+            frameCount: 1,
+            drawOrder: [
+                "arm_l", "legs", "torso", "head", "helmet", "sword_r", "arm_r"
+            ]
         },
         idle_right: {
             x: 0,
             y: 32,
-            frameCount: 1
+            frameCount: 1,
+            drawOrder: [
+                "arm_l", "legs", "torso", "head", "helmet", "sword_r", "arm_r"
+            ]
         },
         idle_left: {
             x: 0,
             y: 64,
-            frameCount: 1
+            frameCount: 1,
+            drawOrder: [
+                "sword_r", "arm_r", "legs", "torso", "arm_l", "head", "helmet"
+            ]
         },
         idle_up: {
             x: 0,
             y: 96,
-            frameCount: 1
+            frameCount: 1,
+            drawOrder: [
+                "arm_l", "legs", "torso", "head", "helmet", "sword_r", "arm_r"
+            ]
         },
         punch_down: {
             x: 128,

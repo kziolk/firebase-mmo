@@ -3,7 +3,7 @@ import { ctx } from "../graphic/graphic"
 import { attacks, attacksData } from "../combat/attacks"
 import { input } from "../input"
 import { MovingEntity, vectorUpdateKnockback } from "./MovingEntity"
-import { Sprite, animations } from "../graphic/sprite"
+import { ComplexSprite, animations } from "../graphic/sprite"
 import { mobs } from "./mobs/mobsManager"
 import { players } from "./playersManager"
 import { PLAYER_RADIUS, PLAYER_REACH_DISTANCE, PLAYER_SPEED } from "./entityConsts"
@@ -27,7 +27,7 @@ class Player extends MovingEntity {
         this.attack = { lastUsed: 0 }
 
         // for animation
-        this.sprite = new Sprite()
+        this.sprite = new ComplexSprite("player", ["arm_l", "arm_r", "legs", "torso", "head", "helmet", "sword_r"])
         this.direction = "down"
         this.activity = "idle"        
     }
@@ -136,7 +136,7 @@ class Player extends MovingEntity {
         // map game position to screen position
         const drawPos = cam.gamePos2ScreenPos(this.pos)
         const drawRadius = PLAYER_RADIUS * cam.config.meter2pixels 
-        ctx.fillStyle = 'rgba(0,255,255,0.5)'
+        ctx.fillStyle = 'rgba(0,255,255,0.3)'
         ctx.beginPath()
         ctx.arc(drawPos.x, drawPos.y, drawRadius, 0, Math.PI*2, true)
         ctx.fill()
