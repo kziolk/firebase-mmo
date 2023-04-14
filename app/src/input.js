@@ -2,7 +2,8 @@ import { graphic } from "./graphic/graphic"
 import { mobsManager } from "./entities/mobs/mobsManager"
 import { player } from "./entities/player"
 import { menu } from "./menu"
-import { hotbar } from "./eq"
+import { eq } from "./eq/eq"
+import { gui } from "./graphic/gui"
 
 export var input = {
     mode: null,
@@ -67,6 +68,10 @@ const modes = {
             right: function () { input.keyboard.pressingRight = true },
             down: function () { input.keyboard.pressingDown = true },
             up: function () { input.keyboard.pressingUp = true },
+            openInventory: function () { 
+                gui.openInventory()
+                input.setMode("eq")
+            },
             spawnMob: function () { 
                 mobsManager.createMob({
                     x: player.pos.x + Math.random() * 10 - 5,
@@ -74,6 +79,7 @@ const modes = {
                 });
             },
             openMenu: function () {
+                input.setMode("menu")
                 menu.open()
             }
         },
@@ -104,16 +110,48 @@ const modes = {
         },
         mouseWheel: function(mouseEvent) {
             let delta = mouseEvent.deltaY / Math.abs(mouseEvent.deltaY)
-            let newItemId = (hotbar.size + hotbar.selectedId + delta) % hotbar.size
+            let newItemId = (eq.hotbar.size + eq.hotbar.selectedId + delta) % eq.hotbar.size
             player.switchItem(newItemId)
         }
+    },
+    eq: {
+        keyBinds: {
+            KeyE: "closeInventory",
+            Escape: "clearSelection"
+        },
+        keyDown: {
+            closeInventory: function() {
+                gui.closeInventory()
+                input.setMode("player_control")
+            },
+            clearSelection: function() {
+                gui.clearSelection()
+            }
+        },
+        keyUp: {},
+        mouseMove: function(mouseEvent) {
+            // save mouse position relative to the canvas
+           input.mouse.pos.x = mouseEvent.x - graphic.screen.x
+           input.mouse.pos.y = mouseEvent.y - graphic.screen.y
+           gui.hoverOverItemSlot()
+        },
+        mouseDown: function(mouseEvent){
+            if (mouseEvent.button == 0) {
+                gui.selectHovered()
+            }
+            else if (mouseEvent.button == 1)
+                gui.segmentSelected()
+        },
     },
     menu: {
         keyBinds: {
             Escape: "closeMenu"
         },
         keyDown: {
-            closeMenu: function() { menu.close() }
+            closeMenu: function() { 
+                menu.close()
+                input.setMode("player_control")
+            }
         },
         keyUp: {}
     }
@@ -125,6 +163,7 @@ function initKeyBinds() {
     modes.player_control.keyBinds["KeyD"] = "right"
     modes.player_control.keyBinds["KeyW"] = "up"
     modes.player_control.keyBinds["KeyS"] = "down"
+    modes.player_control.keyBinds["KeyE"] = "openInventory"
     modes.player_control.keyBinds["Space"] = "spawnMob"
     modes.player_control.keyBinds["Escape"] = "openMenu"
 
@@ -133,7 +172,7 @@ function initKeyBinds() {
     
     for (let i = 1; i <= 9; i++)
         modes.player_control.keyDown["select" + i] = function () {
-            hotbar.selectedId = i - 1
+            eq.hotbar.selectedId = i - 1
         }
 
 

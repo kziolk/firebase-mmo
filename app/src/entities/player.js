@@ -7,7 +7,7 @@ import { ComplexSprite, animations } from "../graphic/sprite"
 import { mobs } from "./mobs/mobsManager"
 import { players } from "./playersManager"
 import { PLAYER_RADIUS, PLAYER_REACH_DISTANCE, PLAYER_SPEED } from "./entityConsts"
-import { hotbar } from "../eq"
+import { eq } from "../eq/eq"
 import { timeNow } from "../game"
 
 class Player extends MovingEntity {
@@ -32,8 +32,7 @@ class Player extends MovingEntity {
             "arm_r": "arm_r",
             "legs": "legs", 
             "torso": "torso", 
-            "head": "head", 
-            "helmet": "helmet"
+            "head": "head"
         })
         this.direction = "down"
         this.activity = "idle"        
@@ -45,7 +44,7 @@ class Player extends MovingEntity {
         this.pos.y = pos.y
 
         // init player eq
-        hotbar.init()
+        eq.init()
         this.initSelectedItem()
     }
 
@@ -89,8 +88,9 @@ class Player extends MovingEntity {
                     // debug: ratio of time last for combination attack
                     playerDebugData.attackCombinationWindowBar = 0
                 }
-
-                // weapon.attack(this, mobs, players)
+                
+                this.attack.name = attackStep.name
+                attacks.trigger(this, mobs, players)
                 this.occupied = true
                 this.activity = attackStep.activity
                 this.attack.duration = attackStep.duration
@@ -166,25 +166,38 @@ class Player extends MovingEntity {
     }
 
     initSelectedItem() {
-        this.item = hotbar.items[hotbar.selectedId]
+        this.item = eq.hotbar.items[eq.hotbar.selectedId]
         this.resetAttack()
-        this.addItemSprite()
+        if (this.item) this.addItemSprite(this.item, "hotbar")
     }
 
     switchItem(slotId) {
-        this.removeItemSprite()
-        hotbar.selectedId = slotId
+        if (this.item) this.removeItemSprite(this.item, "hotbar")
+        eq.hotbar.selectedId = slotId
         this.initSelectedItem()
     }
 
-    addItemSprite() {
-        if (!this.item) return
-        this.sprite.setSpritePart(this.item.spritePart, this.item.name)
+    addItemSprite(item, where) {
+        let spritePart, spriteName
+        if (where == "hotbar") {
+            spritePart = spritePartInHotbar(item.spritePart)
+            spriteName = spriteNameInHotbar(item.name, item.purpose)
+        } else {
+            spritePart = item.spritePart
+            spriteName = item.name
+        }
+        console.log("adding item " + spriteName + " on " + where + " as " + spritePart)
+        this.sprite.setSpritePart(spritePart, spriteName)
     }
 
-    removeItemSprite() {
-        if (!this.item) return
-        this.sprite.removeSpritePart(this.item.spritePart)
+    removeItemSprite(item, where) {
+        let spritePart
+        if (where == "hotbar") {
+            spritePart = spritePartInHotbar(item.spritePart)
+        } else {
+            spritePart = item.spritePart
+        }
+        this.sprite.removeSpritePart(spritePart)
     }
 }
 
@@ -229,11 +242,24 @@ const playerVectorUpdateFoos = {
 }
 
 function playerAttackFromItem(item) {
-    if (!item) return "fist";
+    if (!item) return "fist"
+    else if (item.purpose != "weapon") return "fist"
     else return item.type
 }
 
 export const playerDebugData = {
     attackDurationBar: 0,
     attackCombinationWindowBar: 0
+}
+
+function spritePartInHotbar(spritePart) {
+    if (spritePart == "weapon_r" || spritePart == "weapon_l")
+        return spritePart
+    return "weapon_r"
+}
+
+function spriteNameInHotbar(spriteName, spritePurpose) {
+    if (spritePurpose == "weapon")
+        return spriteName
+    return "holdable_" + spriteName
 }

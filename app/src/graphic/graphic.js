@@ -5,9 +5,10 @@ import { input } from "../input"
 import { player, playerDebugData } from "../entities/player"
 import { CHUNK_SIZE, terrain } from "../terrain"
 import { players } from "../entities/playersManager"
-import { hotbar } from "../eq"
+import { hotbar } from "../eq/eq"
 import { PLAYER_RADIUS } from "../entities/entityConsts"
 import { timeNow } from "../game"
+import { gui } from "./gui"
 
 export const cnv = document.getElementById("game-container")
 export const ctx = cnv.getContext('2d')
@@ -25,12 +26,15 @@ export const graphic = {
         window.addEventListener('resize', function() {
             resizeCanvas()
             cam.resize()
+            gui.resize()
         });
         // init images
         Object.keys(imgData).forEach(imgId => {
             let img = imgs[imgId] = new Image();
             img.src = imgData[imgId].path;
         });
+
+        gui.init()
     },
     screen: { },
     draw() {
@@ -43,8 +47,8 @@ export const graphic = {
         //for debug
         drawPlayerAttackBars()
 
-        //hotbar
-        drawHotbar()
+        // hotbar / inventory
+        gui.draw()
 
         // debug info
         drawCoords()
@@ -153,29 +157,6 @@ function drawPlayerAttackBars() {
     }
 }
 
-function drawHotbar() {
-    let hotbarW = cnv.width / 2
-    let hotbarH = cnv.width / 18
-    let hotbarX = cnv.width / 4
-    let hotbarY = cnv.height - 1.5 * hotbarH
-
-    ctx.fillStyle = "rgba(100, 50, 0, 0.7)"
-    ctx.fillRect(hotbarX, hotbarY, hotbarW, hotbarH)
-    ctx.drawImage(imgs.gui_hotbar, hotbarX, hotbarY, hotbarW, hotbarH)
-
-    for (let i = 0; i < hotbar.size; i++) {
-        let x = hotbarX + i * hotbarH
-        if (hotbar.items[i]) {
-            ctx.drawImage(imgs["item_" + hotbar.items[i].name], x, hotbarY, hotbarH, hotbarH)
-        }
-        if (i == hotbar.selectedId) {
-            ctx.strokeStyle = "rgb(230, 230, 90)"
-            ctx.lineWidth = 5
-            ctx.strokeRect(x, hotbarY, hotbarH, hotbarH)
-        }
-    }
-}   
-
 function drawCoords() {
     ctx.fillStyle = 'yellow'
     ctx.font = "20px Arial";
@@ -229,11 +210,11 @@ function resizeCanvas() {
 }
 
 
-let tileValToImgName = {
+const tileValToImgName = {
     1: "tile_tree"
 }
 
-let imgs = {}
+const imgs = {}
 
 const imgData = {
     tile_tree: {
@@ -242,14 +223,5 @@ const imgData = {
         offY: 1 - 50/32,
         scaleY: 50 / 32,
         scaleX: 1
-    },
-    gui_hotbar: {
-        path: "img/gui/hotbar.png"
-    },
-    item_sword_r: {
-        path: "img/items/sword_r.png"
-    },
-    item_bow_l: {
-        path: "img/items/bow_l.png"
     }
 }

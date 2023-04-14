@@ -6,7 +6,6 @@ export const menu = {
 
     },
     open() {
-        input.setMode("menu")
         graphic.darken = true
 
         const menuContainer = document.createElement("div")
@@ -39,7 +38,7 @@ export const menu = {
     },
     close() {
         document.body.removeChild(document.getElementById("menu-container"))
-        input.setMode("player_control")
         graphic.darken = false
+        input.setMode("player_control")
     }
 }

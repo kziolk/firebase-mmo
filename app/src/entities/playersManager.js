@@ -13,7 +13,14 @@ class OtherPlayer extends MovingEntity {
             }, PLAYER_SPEED)
         this.pos = this.hitbox.pos
         this.reachPoint = {x: 0, y: 0}
-        this.sprite = new ComplexSprite()
+        this.sprite = new ComplexSprite("player", {
+            "arm_l": "arm_l", 
+            "arm_r": "arm_r",
+            "legs": "legs", 
+            "torso": "torso", 
+            "head": "head", 
+            "helmet": "helmet"
+        })
         this.activity = "idle_down"
     }
 

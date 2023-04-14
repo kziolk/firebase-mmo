@@ -2,7 +2,7 @@ import { collision } from "../physics/collision"
 import { combat } from "./combat"
 
 export const attacks = {
-    use(wielder, mobEntities, playerEntities) {
+    trigger(wielder, mobEntities, playerEntities) {
         const executeAttack = attackFoos[wielder.attack.name]
         if (executeAttack) executeAttack(wielder, mobEntities, playerEntities)
     }
@@ -11,29 +11,30 @@ export const attacks = {
 export const attacksData = {
     fist: {
         steps: [
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
-            { duration: 200, baseAttack: 10, activity: "kick", continueWindow: 500 }
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
+            { duration: 200, baseAttack: 10, activity: "kick", continueWindow: 500, name: "punch" }
         ]
     },
     sword: {
         steps: [
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
-            { duration: 200, baseAttack: 10, activity: "kick", continueWindow: 500 },
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500 },
-            { duration: 500, baseAttack: 10, activity: "kick", continueWindow: 500 }
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
+            { duration: 200, baseAttack: 10, activity: "kick", continueWindow: 500, name: "punch" },
+            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
+            { duration: 500, baseAttack: 10, activity: "kick", continueWindow: 500, name: "punch" }
         ]
     },
     bow: {
         steps: [
-            { duration: 100, baseAttack: 10, activity: "360" }
+            { duration: 100, baseAttack: 10, activity: "360", name: "punch" }
         ]
     }
 }
 
 const attackFoos = {
-    fist: function (wielder, mobEntities, playerEntities) {
+    punch: function (wielder, mobEntities, playerEntities) {
+        console.log("punch!")
         // if player initiated attack (leftclick)
         let damageHitbox = {
             type: 'line',
@@ -47,8 +48,8 @@ const attackFoos = {
         Object.keys(mobEntities).forEach(entityId=> {
             let m = mobEntities[entityId]
             if (collision.detect(damageHitbox, m.hitbox)) {
-                combat.applyKnockbackOnMob(m)
-                //delete mobs[mobId]
+                //combat.applyKnockbackOnMob(m)
+                delete mobs[mobId]
             }
         })
 

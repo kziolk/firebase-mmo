@@ -16,10 +16,14 @@ const pathToSprite = {
     "torso": "img/animations/bodyParts/torso.png",
 
     // armor
-    "helmet": "img/animations/armorParts/helmet.png",
+    "leather_helmet": "img/animations/armorParts/leather_helmet.png",
 
     // weapons
-    "sword_r": "img/animations/weapons/sword_r.png"
+    "sword_r": "img/animations/weapons/sword_r.png",
+    "bow_r": "img/animations/weapons/bow_r.png",
+
+    // items in hand
+    "holdable_leather_helmet": "img/animations/items/holdable_leather_helmet.png"
 }
 
 export class ComplexSprite {
@@ -181,7 +185,7 @@ export const animations = {
             y: 0,
             frameCount: 1,
             drawOrder: [
-                "arm_l", "legs", "torso", "head", "helmet", "arm_r"
+                "arm_l", "legs", "torso", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
         punch_right: {
@@ -189,7 +193,7 @@ export const animations = {
             y: 32,
             frameCount: 1,
             drawOrder: [
-                "arm_l", "legs", "torso", "head", "helmet", "arm_r"
+                "arm_l", "legs", "torso", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
         punch_left: {
@@ -197,7 +201,7 @@ export const animations = {
             y: 64,
             frameCount: 1,
             drawOrder: [
-                "arm_r", "legs", "torso", "arm_l", "head", "helmet"
+                "weapon_r", "arm_r", "legs", "torso", "arm_l", "head", "helmet"
             ]
         },
         punch_up: {
@@ -205,7 +209,7 @@ export const animations = {
             y: 96,
             frameCount: 1,
             drawOrder: [
-                "arm_l", "legs", "torso", "head", "helmet", "arm_r"
+                "arm_l", "legs", "torso", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
         kick_down: {
