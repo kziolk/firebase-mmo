@@ -21,7 +21,6 @@ export const graphic = {
     init() {
         // set size of canvas relative to the screen
         resizeCanvas()
-        cam.resize()
         // canvas on window resize
         window.addEventListener('resize', function() {
             resizeCanvas()

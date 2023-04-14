@@ -4,6 +4,7 @@ import { player } from "./entities/player"
 import { menu } from "./menu"
 import { eq } from "./eq/eq"
 import { gui } from "./graphic/gui"
+import { saveEq } from "./db/eq"
 
 export var input = {
     mode: null,
@@ -26,6 +27,7 @@ export var input = {
         initKeyBinds()
         this.mode = modes.player_control
         addEventListener("keydown", function(keyEvent) {
+            //console.log(keyEvent.code)
             // if hashmap contains code of pressed key then run associated method
             const methodName = input.mode.keyBinds[keyEvent.code]
             const handleInput = input.mode.keyDown[methodName]
@@ -65,22 +67,25 @@ const modes = {
         keyBinds: {}, // to initialize
         keyDown: {
             left: function() { input.keyboard.pressingLeft = true },
-            right: function () { input.keyboard.pressingRight = true },
-            down: function () { input.keyboard.pressingDown = true },
-            up: function () { input.keyboard.pressingUp = true },
-            openInventory: function () { 
+            right: function() { input.keyboard.pressingRight = true },
+            down: function() { input.keyboard.pressingDown = true },
+            up: function() { input.keyboard.pressingUp = true },
+            openInventory: function() { 
                 gui.openInventory()
                 input.setMode("eq")
             },
-            spawnMob: function () { 
-                mobsManager.createMob({
-                    x: player.pos.x + Math.random() * 10 - 5,
-                    y: player.pos.y + Math.random() * 10 - 5 
-                });
+            spawnMob: function() { 
+                // mobsManager.createMob({
+                //     x: player.pos.x + Math.random() * 10 - 5,
+                //     y: player.pos.y + Math.random() * 10 - 5 
+                // });
             },
-            openMenu: function () {
+            openMenu: function() {
                 input.setMode("menu")
                 menu.open()
+            },
+            someTests: function() {
+                saveEq()
             }
         },
         keyUp: {
@@ -166,6 +171,7 @@ function initKeyBinds() {
     modes.player_control.keyBinds["KeyE"] = "openInventory"
     modes.player_control.keyBinds["Space"] = "spawnMob"
     modes.player_control.keyBinds["Escape"] = "openMenu"
+    modes.player_control.keyBinds["Backslash"] = "someTests"
 
     for (let i = 1; i <= 9; i++)
         modes.player_control.keyBinds["Digit" + i] = "select" + i

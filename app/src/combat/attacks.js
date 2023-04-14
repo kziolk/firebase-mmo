@@ -56,6 +56,7 @@ const attackFoos = {
         Object.keys(playerEntities).forEach(entityId=> {
             let p = playerEntities[entityId]
             if (collision.detect(damageHitbox, p.hitbox)) {
+                console.log("collision detected")
                 combat.applyKnockbackOnOtherPlayer(p, entityId)
                 //delete mobs[mobId]
             }

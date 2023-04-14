@@ -1,16 +1,23 @@
+import { getEq } from "../db/eq"
 import { player } from "../entities/player"
+import { game } from "../game"
 
 export const eq = {
     init() {
         this.hotbar.init()
         this.backpack.init()
         this.armor.init()
+        if (game.mode == "multiplayer") {
+            getEq()
+        }
     },
     hotbar: {
         size: 9,
         items: new Array(9),
         selectedId: 0,
-        init() {}
+        init() {
+            this.items.fill(0)
+        }
     },
     backpack: {
         size: 9 * 3,
@@ -34,12 +41,15 @@ export const eq = {
                 purpose: "armor",
                 spritePart: "helmet"
             }
+            this.items.fill(0, 0, 27)
         }
     },
     armor: {
         size: 4,
         items: new Array(4),
-        init() {}
+        init() {
+            this.items.fill(0)
+        }
     },
     swapItems(place1, id1, place2, id2) {
         // abort when items can't switch places

@@ -36,6 +36,7 @@ export class ComplexSprite {
                 pos: {x: 0, y: 0},
                 gameWidth: 1,
                 gameHeight: 1,
+                name: spriteName
             }
             this.sprites[partName].img.src = pathToSprite[spriteName]
         });
@@ -44,6 +45,9 @@ export class ComplexSprite {
         this.animationFrame = 0
         this.animation = animations[this.entityName]["walking_down"]
         this.frameDuration = 200
+
+        console.log("Added complex sprite")
+        console.log(this)
     }
 
     setSpritePart(partName, spriteName) {

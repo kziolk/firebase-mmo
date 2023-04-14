@@ -18,8 +18,7 @@ class OtherPlayer extends MovingEntity {
             "arm_r": "arm_r",
             "legs": "legs", 
             "torso": "torso", 
-            "head": "head", 
-            "helmet": "helmet"
+            "head": "head"
         })
         this.activity = "idle_down"
     }
@@ -32,7 +31,7 @@ class OtherPlayer extends MovingEntity {
         // map game position to screen position
         const drawPos = cam.gamePos2ScreenPos(this.pos)
         const drawRadius = PLAYER_RADIUS * cam.config.meter2pixels 
-        ctx.fillStyle = 'rgba(0,255,255,0.7)'
+        ctx.fillStyle = 'rgba(0,0,255,0.2)'
         ctx.beginPath()
         ctx.arc(drawPos.x, drawPos.y, drawRadius, 0, Math.PI*2, true)
         ctx.fill()
@@ -68,7 +67,7 @@ export const playersManager = {
             //players[playerKey].yBottom = players[playerKey].pos.y + players[playerKey].hitbox.r
         })
     },
-    setOtherPlayer(pKey, pVal) {
+    setOtherPlayerMovement(pKey, pVal) {
         if (!players[pKey]) {
             players[pKey] = new OtherPlayer()
         }
@@ -80,6 +79,20 @@ export const playersManager = {
         otherPlayer.activity = pVal.activity
         otherPlayer.reachPoint.x = pVal.reachPointX
         otherPlayer.reachPoint.y = pVal.reachPointY
+    },
+    setOtherPlayerOutfit(pKey, outfit) {
+        if (!players[pKey]) {
+            players[pKey] = new OtherPlayer()
+        }
+        let otherPlayer = players[pKey]
+        Object.keys(outfit).forEach((spritePart) => {
+            let spriteName = outfit[spritePart]
+            if (spriteName) {
+                otherPlayer.sprite.setSpritePart(spritePart, spriteName)
+            } else if (otherPlayer.sprite.sprites[spritePart]) {
+                otherPlayer.sprite.removeSpritePart(spritePart)
+            }
+        })
     },
     removeOtherPlayer(pKey) {
         delete players[pKey]

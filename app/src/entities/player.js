@@ -63,7 +63,7 @@ class Player extends MovingEntity {
         }
         else {
             // update debug bar indicating time remaining for combination attack
-            let attackName = playerAttackFromItem(this.item)
+            let attackName = playerAttackFromItem(this.getItem())
             let attackStep = attacksData[attackName].steps[this.attack.step]
             if ((this.attack.step < attacksData[attackName].steps.length) && 
             (timeNow - this.attack.lastUsed - this.attack.duration < attackStep.continueWindow)) {
@@ -140,7 +140,7 @@ class Player extends MovingEntity {
         // map game position to screen position
         const drawPos = cam.gamePos2ScreenPos(this.pos)
         const drawRadius = PLAYER_RADIUS * cam.config.meter2pixels 
-        ctx.fillStyle = 'rgba(0,255,255,0.3)'
+        ctx.fillStyle = 'rgba(0,255,0,0.2)'
         ctx.beginPath()
         ctx.arc(drawPos.x, drawPos.y, drawRadius, 0, Math.PI*2, true)
         ctx.fill()
@@ -166,13 +166,12 @@ class Player extends MovingEntity {
     }
 
     initSelectedItem() {
-        this.item = eq.hotbar.items[eq.hotbar.selectedId]
         this.resetAttack()
-        if (this.item) this.addItemSprite(this.item, "hotbar")
+        if (this.getItem()) this.addItemSprite(this.getItem(), "hotbar")
     }
 
     switchItem(slotId) {
-        if (this.item) this.removeItemSprite(this.item, "hotbar")
+        if (this.getItem()) this.removeItemSprite(this.getItem(), "hotbar")
         eq.hotbar.selectedId = slotId
         this.initSelectedItem()
     }
@@ -186,7 +185,7 @@ class Player extends MovingEntity {
             spritePart = item.spritePart
             spriteName = item.name
         }
-        console.log("adding item " + spriteName + " on " + where + " as " + spritePart)
+        //console.log("adding item " + spriteName + " on " + where + " as " + spritePart)
         this.sprite.setSpritePart(spritePart, spriteName)
     }
 
@@ -198,6 +197,10 @@ class Player extends MovingEntity {
             spritePart = item.spritePart
         }
         this.sprite.removeSpritePart(spritePart)
+    }
+
+    getItem() {
+        return eq.hotbar.items[eq.hotbar.selectedId]
     }
 }
 

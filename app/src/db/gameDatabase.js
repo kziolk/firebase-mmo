@@ -3,9 +3,13 @@ import { player } from "../entities/player";
 import { timeNow } from "../game";
 import { playerRef } from "./auth";
 import { db } from "./init";
+import { savePlayerVisuals } from "./players";
 
-const DB_UPDATE_DELAY = 50
-let lastUpdateTime = 0
+const DB_UPDATE_DELAY = 100
+let lastDbUpdateTime = 0
+
+const FS_UPDATE_DELAY = 2000
+let lastFsUpdateTime = 0
 
 export const dbUpdater = {
     tasks: []
@@ -20,10 +24,13 @@ export const database = {
         })
         dbUpdater.tasks = []
 
-
-        if (timeNow - lastUpdateTime > DB_UPDATE_DELAY) {
+        if (timeNow - lastDbUpdateTime > DB_UPDATE_DELAY) {
             savePlayer()
-            lastUpdateTime = timeNow
+            lastDbUpdateTime = timeNow
+        }
+        if (timeNow - lastFsUpdateTime > FS_UPDATE_DELAY) {
+            savePlayerVisuals()
+            lastFsUpdateTime = timeNow
         }
     }
 }
@@ -32,10 +39,10 @@ function savePlayer() {
     set(playerRef, {
         x: player.pos.x,
         y: player.pos.y,
-        vx: player.v.x,
-        vy: player.v.y,
+        vx: player.v.x / 2,
+        vy: player.v.y / 2,
         reachPointX: player.reachPoint.x,
         reachPointY: player.reachPoint.y,
-        activity: player.activity
+        activity: player.activity + "_" + player.direction
     })
 }
