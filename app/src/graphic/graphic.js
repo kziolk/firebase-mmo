@@ -3,7 +3,7 @@ import { debugInfo } from "../dbg"
 import { mobs } from "../entities/mobs/mobsManager"
 import { input } from "../input"
 import { player, playerDebugData } from "../entities/player"
-import { CHUNK_SIZE, terrain } from "../terrain"
+import { CHUNK_SIZE, GRID_SIZE, terrain } from "../terrain"
 import { players } from "../entities/playersManager"
 import { hotbar } from "../eq/eq"
 import { PLAYER_RADIUS } from "../entities/entityConsts"
@@ -63,6 +63,7 @@ export const graphic = {
 
 let allEntities = []
 function drawTerrain() {
+    // potential lag:
     sortAllEntities()
     let nextEntityIdToDraw = 0
     
@@ -72,26 +73,33 @@ function drawTerrain() {
     let topY = Math.floor(cam.pos.y + 1)
     if (topY < terrain.grid[0][0].y)
         topY = terrain.grid[0][0].y
-    let rightX = Math.floor(cam.pos.x + cam.width)
+    let rightX = Math.floor(cam.pos.x + cam.width - 1)
     if (rightX >= terrain.grid[2][2].x + CHUNK_SIZE)
         rightX = terrain.grid[2][2].x + CHUNK_SIZE - 1
-    let bottomY = Math.floor(cam.pos.y + cam.height)
+    let bottomY = Math.floor(cam.pos.y + cam.height - 1)
     if (bottomY >= terrain.grid[2][2].y + CHUNK_SIZE)
         bottomY = terrain.grid[2][2].y + CHUNK_SIZE - 1
 
     let topLeftDrawPos = cam.gamePos2ScreenPos( {x: leftX, y: topY} )
 
-    for (let y = topY; y < bottomY; y++) {
+    for (let y = topY; y <= bottomY; y++) {
         let wallTiles = []
         // layer 1: row of floor tiles
         ctx.strokeStyle = "#0090ff"
         ctx.lineWidth = 2
-        for (let x = leftX; x < rightX; x++) {
-            let chunkIdX = Math.floor((x + CHUNK_SIZE) / CHUNK_SIZE)
-            let chunkIdY = Math.floor((y + CHUNK_SIZE) / CHUNK_SIZE)
+        for (let x = leftX; x <= rightX; x++) {
+            let chunkIdX = Math.floor((x - terrain.grid[0][0].x) / CHUNK_SIZE)
+            let chunkIdY = Math.floor((y - terrain.grid[0][0].y) / CHUNK_SIZE)
             let chunk = terrain.grid[chunkIdX][chunkIdY]
             let tileIdX = x - chunk.x
             let tileIdY = y - chunk.y
+            
+            if (!chunk.tiles) {
+                // tiles aren't loaded. jump to next chunk
+                x += CHUNK_SIZE - tileIdX - 1
+                continue
+            } 
+
             let tileVal = chunk.tiles[tileIdX][tileIdY]
             let dx = x - leftX
             let dy = y - topY
@@ -99,7 +107,7 @@ function drawTerrain() {
             let drawY = topLeftDrawPos.y + dy * cam.config.meter2pixels
             if(tileVal == 0) {
                 // tile doesn't have a wall
-                ctx.fillStyle = "#0c0c0c"
+                ctx.fillStyle = "#0c3c1c"
                 ctx.fillRect(drawX, drawY, cam.config.meter2pixels, cam.config.meter2pixels)
                 ctx.strokeRect(drawX, drawY, cam.config.meter2pixels, cam.config.meter2pixels)
             } else {
@@ -133,6 +141,23 @@ function drawTerrain() {
     while (nextEntityIdToDraw < allEntities.length) {
         allEntities[nextEntityIdToDraw].draw()
         nextEntityIdToDraw++
+    }
+
+    // draw chunk borders
+    ctx.strokeStyle = "#ff0000"
+    ctx.lineWidth = 1
+    for (let gx = 0; gx < GRID_SIZE; gx++) {
+        for (let gy = 0; gy < GRID_SIZE; gy++) {
+            let cx = terrain.grid[gx][gy].x
+            let cy = terrain.grid[gx][gy].y
+            let chunkDrawPos = cam.gamePos2ScreenPos( {x: cx, y: cy} )
+            ctx.strokeRect(
+                chunkDrawPos.x, 
+                chunkDrawPos.y, 
+                CHUNK_SIZE * cam.config.meter2pixels,
+                CHUNK_SIZE * cam.config.meter2pixels)
+        }
+        
     }
 }
 

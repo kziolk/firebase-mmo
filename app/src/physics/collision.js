@@ -30,6 +30,7 @@ export const collision = {
 }
 
 const tileValToCollisionBox = {
+    0: null,
     1: function (x, y) {
         return {
             type: "circle",

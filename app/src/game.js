@@ -80,6 +80,9 @@ function update() {
     if (game.mode == "multiplayer")
         database.update()
 
+    // load new chunks
+    terrain.update()
+
     // camera follows player
     cam.update()
     // real fps tracking
