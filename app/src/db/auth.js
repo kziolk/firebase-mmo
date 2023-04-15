@@ -4,6 +4,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth"
 
 import { db/*, fs*/ } from "./init.js"
 import { initializeGame } from "../index.js"
+import { dbPathTo } from "./gameDatabase.js"
 
 export var playerRef = 0
 export var clientUid = 0
@@ -30,10 +31,9 @@ export function authenticateUser() {
             // User is signed in, see docs for a list of available properties
             // https://firebase.google.com/docs/reference/js/firebase.User
             clientUid = user.uid
-            playerRef = ref(db, `2_0/players/${clientUid}`)
+            playerRef = ref(db, `${dbPathTo.playerData}/${clientUid}`)
             console.log("user logged in: " + clientUid)
-            onDisconnect(ref(db, `2_0/players/${clientUid}`)).remove()
-            remove(ref(db, `2_0/playersStates/${clientUid}`))
+            onDisconnect(ref(db, `${dbPathTo.playerData}/${clientUid}/loggedIn`)).set(false)
             initializeGame()
         } else {
             // User is signed out

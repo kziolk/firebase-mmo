@@ -140,15 +140,15 @@ function drawPlayerAttackBars() {
     if (player.occupied) {
         let barX = player.pos.x - PLAYER_RADIUS
         let barY = player.pos.y - PLAYER_RADIUS
-        let barH = PLAYER_RADIUS * 2 * playerDebugData.attackDurationBar
+        let barH = PLAYER_RADIUS * 2 * playerDebugData.actionProgress
         barY += PLAYER_RADIUS * 2 - barH
         let barDrawPos = cam.gamePos2ScreenPos({x: barX, y: barY})
         ctx.fillStyle = "red"
         ctx.fillRect(barDrawPos.x - 30, barDrawPos.y, 20, barH * cam.config.meter2pixels)
-    } else if (playerDebugData.attackCombinationWindowBar) {
+    } else if (playerDebugData.comboGapStatus) {
         let barX = player.pos.x - PLAYER_RADIUS
         let barY = player.pos.y - PLAYER_RADIUS
-        let barH = PLAYER_RADIUS * 2 * (1 - playerDebugData.attackCombinationWindowBar)
+        let barH = PLAYER_RADIUS * 2 * (playerDebugData.comboGapStatus)
         barY += PLAYER_RADIUS * 2 - barH
         let barDrawPos = cam.gamePos2ScreenPos({x: barX, y: barY})
         ctx.fillStyle = "yellow"
@@ -162,8 +162,8 @@ function drawCoords() {
     ctx.fillText("fps: " + debugInfo.fps.toFixed(2), 24, 30)
     ctx.fillText("player x: " + player.pos.x.toFixed(2) + ", y: " + player.pos.y.toFixed(2), 24, 60)
     ctx.fillText("cam x: " + cam.pos.x.toFixed(2) + ", y: " + cam.pos.y.toFixed(2), 24, 90)
-    ctx.fillText("that box x: " + cam.boxOfStillness.pos.x.toFixed(2) + ", y: " + cam.boxOfStillness.pos.y.toFixed(2), 24, 120)
-    ctx.fillText("mouse x: " + input.mouse.pos.x.toFixed(2) + ", y: " + input.mouse.pos.y.toFixed(2), 24, 150)
+    ctx.fillText("mouse x: " + input.mouse.pos.x.toFixed(2) + ", y: " + input.mouse.pos.y.toFixed(2), 24, 120)
+    ctx.fillText("HP: " + player.hp, 24, 150)
 }
 
 function sortAllEntities() {

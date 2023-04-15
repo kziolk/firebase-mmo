@@ -1,16 +1,17 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp } from "firebase/app"
 import { getDatabase, ref } from "firebase/database"
 import { getFirestore } from "firebase/firestore"
+import { dbPathTo } from "./gameDatabase"
 
 let app
-export let db, dbRef, playersRef, fs;
+export let db, dbRef, playersRef, fs
 
 export async function initDB() {
-    app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-    dbRef = ref(db);
-    playersRef = ref(db, '2_0/players');
-    fs = getFirestore(app);
+    app = initializeApp(firebaseConfig)
+    db = getDatabase(app)
+    dbRef = ref(db)
+    playersRef = ref(db, dbPathTo.playerData)
+    fs = getFirestore(app)
 }
 
 /*

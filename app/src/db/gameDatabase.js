@@ -1,9 +1,10 @@
-import { ref, set } from "firebase/database";
+import { child, get, ref, remove, set } from "firebase/database";
 import { player } from "../entities/player";
 import { timeNow } from "../game";
-import { playerRef } from "./auth";
+import { clientUid, playerRef } from "./auth";
 import { db } from "./init";
 import { savePlayerVisuals } from "./players";
+import { saveEq } from "./eq";
 
 const DB_UPDATE_DELAY = 100
 let lastDbUpdateTime = 0
@@ -30,19 +31,46 @@ export const database = {
         }
         if (timeNow - lastFsUpdateTime > FS_UPDATE_DELAY) {
             savePlayerVisuals()
+            saveEq()
             lastFsUpdateTime = timeNow
         }
+    },
+    async initPlayer() {
+        await remove(ref(db, `${dbPathTo.playerReceivedAttacks}/${clientUid}`))
+        await get(child(ref(db), `${dbPathTo.playerData}/${clientUid}`)).
+        then((pSnap) => {
+            if (pSnap.exists()) {
+                let pVal = pSnap.val()
+                // set player positon
+                player.setPosition({x: pVal.x, y: pVal.y})
+                player.hp = pVal.hp
+            }
+        })
     }
 }
 
+export const dbPathTo = {
+    playerReceivedAttacks: "playerReceivedAttacks",
+    playerData: "playerData",
+    playerSpriteParts: "playerSpriteParts",
+}
+
+let oldPlayerDataStr = "scoobydoo"
 function savePlayer() {
-    set(playerRef, {
+    const newPlayerData = {
         x: player.pos.x,
         y: player.pos.y,
         vx: player.v.x / 2,
         vy: player.v.y / 2,
         reachPointX: player.reachPoint.x,
         reachPointY: player.reachPoint.y,
-        activity: player.activity + "_" + player.direction
-    })
+        activity: player.activity + "_" + player.direction,
+        hp: player.hp,
+        loggedIn: true
+    }
+    const newPlayerDataStr = JSON.stringify(newPlayerData)
+    if (oldPlayerDataStr != newPlayerDataStr) {
+        set(playerRef, newPlayerData)
+        oldPlayerDataStr = newPlayerDataStr
+    }
 }

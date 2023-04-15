@@ -1,7 +1,7 @@
 import { cam } from "../../graphic/camera"
 import { ctx } from "../../graphic/graphic"
 import { player } from "../player"
-import { MovingEntity, vectorUpdateKnockback } from "../MovingEntity"
+import { MovingEntity, updateEntityKnockback } from "../MovingEntity"
 import { MOB_RADIUS, MOB_SPEED, MOB_REACH_DISTANCE } from "../entityConsts"
 import { ComplexSprite } from "../../graphic/sprite"
 
@@ -59,5 +59,5 @@ const mobVectorUpdateFoos = {
         mEntity.v.x = (mEntity.pos.x - player.pos.x > 0) ? -1 : 1
         mEntity.v.y = (mEntity.pos.y - player.pos.y > 0) ? -1 : 1
     },
-    knockback: vectorUpdateKnockback
+    knockback: updateEntityKnockback
 }

@@ -1,15 +1,10 @@
-import { getEq } from "../db/eq"
 import { player } from "../entities/player"
-import { game } from "../game"
 
 export const eq = {
     init() {
         this.hotbar.init()
         this.backpack.init()
         this.armor.init()
-        if (game.mode == "multiplayer") {
-            getEq()
-        }
     },
     hotbar: {
         size: 9,
@@ -41,7 +36,7 @@ export const eq = {
                 purpose: "armor",
                 spritePart: "helmet"
             }
-            this.items.fill(0, 0, 27)
+            this.items.fill(0, 3, 27)
         }
     },
     armor: {
@@ -49,7 +44,8 @@ export const eq = {
         items: new Array(4),
         init() {
             this.items.fill(0)
-        }
+        },
+        idToSpritePart: ["helmet", "chestplate", "leggings", "boots"]
     },
     swapItems(place1, id1, place2, id2) {
         // abort when items can't switch places
@@ -60,42 +56,43 @@ export const eq = {
         let item1 = this[place1].items[id1]
         let item2 = this[place2].items[id2]
 
-        // take off sprite parts
-        if (item1) {
-            if (place1 == "armor") {
-                player.removeItemSprite(item1, "armor")
-            } else if (place1 == "hotbar" && id1 == this.hotbar.selectedId) {
-                player.removeItemSprite(item1, "hotbar")
-            }
-        }
-        if (item2) {
-            if (place2 == "armor") {
-                player.removeItemSprite(item2, "armor")
-            } else if (place2 == "hotbar" && id2 == this.hotbar.selectedId) {
-                player.removeItemSprite(item2, "hotbar")
-            }
-        }
+        // // take off sprite parts
+        // if (item1) {
+        //     if (place1 == "armor") {
+        //         player.removeItemSprite(item1, "armor")
+        //     } else if (place1 == "hotbar" && id1 == this.hotbar.selectedId) {
+        //         player.removeItemSprite(item1, "hotbar")
+        //     }
+        // }
+        // if (item2) {
+        //     if (place2 == "armor") {
+        //         player.removeItemSprite(item2, "armor")
+        //     } else if (place2 == "hotbar" && id2 == this.hotbar.selectedId) {
+        //         player.removeItemSprite(item2, "hotbar")
+        //     }
+        // }
 
         if (item2) this[place1].items[id1] = JSON.parse(JSON.stringify(item2))
         else this[place1].items[id1] = null
         if (item1) this[place2].items[id2] = JSON.parse(JSON.stringify(item1))
         else this[place2].items[id2] = null
+        player.resetSpriteParts()
 
-        // wear sprite parts
-        if (item2) {
-            if (place1 == "armor") {
-                player.addItemSprite(item2, "armor")
-            } else if (place1 == "hotbar" && id1 == this.hotbar.selectedId) {
-                player.addItemSprite(item2, "hotbar")
-            }
-        }
-        if (item1) {
-            if (place2 == "armor") {
-                player.addItemSprite(item1, "armor")
-            } else if (place2 == "hotbar" && id2 == this.hotbar.selectedId) {
-                player.addItemSprite(item1, "hotbar")
-            }
-        }
+        // // wear sprite parts
+        // if (item2) {
+        //     if (place1 == "armor") {
+        //         player.addItemSprite(item2, "armor")
+        //     } else if (place1 == "hotbar" && id1 == this.hotbar.selectedId) {
+        //         player.addItemSprite(item2, "hotbar")
+        //     }
+        // }
+        // if (item1) {
+        //     if (place2 == "armor") {
+        //         player.addItemSprite(item1, "armor")
+        //     } else if (place2 == "hotbar" && id2 == this.hotbar.selectedId) {
+        //         player.addItemSprite(item1, "hotbar")
+        //     }
+        // }
     }
 }
 

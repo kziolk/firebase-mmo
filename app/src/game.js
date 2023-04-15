@@ -8,6 +8,8 @@ import { terrain } from "./terrain"
 import { database } from "./db/gameDatabase"
 import { playersManager } from "./entities/playersManager"
 import { startPlayersListener } from "./db/players"
+import { getEq } from "./db/eq"
+import { eq } from "./eq/eq"
 
 let loop
 let oldTime, dt
@@ -18,16 +20,23 @@ export const game = {
     config: {
         fpsLimit: 60
     },
-    start() {
+    async start() {
         // initialize components
         input.init();
         terrain.init()
         
-        if (this.mode == "multiplayer")
+        // adds default equipment
+        eq.init()
+        if (this.mode == "multiplayer") {
+            // get eq from database, wait untill it is done
+            await getEq()
+            // set logged in and clear received attack data
+            await database.initPlayer()
+            // listen for changes in other players
             startPlayersListener()
-
-        // set player positon
-        player.init({x: 50, y: 30})
+            
+        }
+        player.resetSpriteParts()
 
         // camera needs player to be initiated
         cam.init();
@@ -78,5 +87,5 @@ function update() {
 }
 
 function consoleLogSomethingAfterInit() {
-    console.log("Game initialized")
+    console.log("Game Initialized!\nPlaying " + game.mode)
 }

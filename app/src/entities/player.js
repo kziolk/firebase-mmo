@@ -2,7 +2,7 @@ import { cam } from "../graphic/camera"
 import { ctx } from "../graphic/graphic"
 import { attacks, attacksData } from "../combat/attacks"
 import { input } from "../input"
-import { MovingEntity, vectorUpdateKnockback } from "./MovingEntity"
+import { MovingEntity, updateEntityKnockback, updateEntityStun, updateEntityTimeKnockback, vectorUpdateKnockback } from "./MovingEntity"
 import { ComplexSprite, animations } from "../graphic/sprite"
 import { mobs } from "./mobs/mobsManager"
 import { players } from "./playersManager"
@@ -26,11 +26,13 @@ class Player extends MovingEntity {
         // tracking attack related data
         this.attack = { lastUsed: 0 }
 
+        this.hp = 5
+
         // for animation
         this.sprite = new ComplexSprite("player", {
             "arm_l": "arm_l", 
             "arm_r": "arm_r",
-            "legs": "legs", 
+            "legs": "legs",
             "torso": "torso", 
             "head": "head"
         })
@@ -38,55 +40,50 @@ class Player extends MovingEntity {
         this.activity = "idle"        
     }
 
-    init(pos) {
+    setPosition(pos) {
         // init player position from db
         this.pos.x = pos.x
         this.pos.y = pos.y
-
-        // init player eq
-        eq.init()
-        this.initSelectedItem()
     }
 
     updateActions(dt) {
         updatePlayerReachPoint()
+        // if player is doing some activity and can't disturb it
         if (this.occupied) {
-            // debug: ratio of completing attack action
-            playerDebugData.attackDurationBar = (timeNow - this.attack.lastUsed) / this.attack.duration
+            // debug: ratio of completing the action
+            playerDebugData.actionProgress = (timeNow - this.attack.lastUsed) / this.attack.duration
             // if attack in the middle of animation then attack
-
+            // .. maybe.
             // set occupied to false eventually
-            if (timeNow - this.attack.lastUsed > this.attack.duration) {
+            // if (timeNow - this.attack.lastUsed > this.attack.duration) {
+            if (playerDebugData.actionProgress > 1) {
                 this.occupied = false
                 this.attack.triggered = false // if mouse clicked during animation
             }
         }
         else {
             // update debug bar indicating time remaining for combination attack
-            let attackName = playerAttackFromItem(this.getItem())
+            let attackName = playerAttackFromItem(this.getHotbarItem())
             let attackStep = attacksData[attackName].steps[this.attack.step]
-            if ((this.attack.step < attacksData[attackName].steps.length) && 
-            (timeNow - this.attack.lastUsed - this.attack.duration < attackStep.continueWindow)) {
-                playerDebugData.attackCombinationWindowBar = (timeNow - this.attack.lastUsed - this.attack.duration) / attackStep.continueWindow
+            if ((this.attack.step < attacksData[attackName].steps.length - 1)) {
+                playerDebugData.comboGapStatus = 1 - (timeNow - this.attack.lastUsed - this.attack.duration) / attackStep.continueWindow
+                playerDebugData.comboGapStatus *= (0 < playerDebugData.comboGapStatus)
             } else {
-                playerDebugData.attackCombinationWindowBar = 0
+                playerDebugData.comboGapStatus = 0
             }
             // update attack
             if (this.attack.triggered) {
                 // if trigger occurs just after last attack then maybe it's the COMBINATION???
-                // let attackName = playerAttackFromItemName[this.item.name]
-                // let attackStep = attacksData[attackName].steps[this.attack.step]
-                if ((this.attack.step < attacksData[attackName].steps.length - 1) && 
-                    (timeNow - this.attack.lastUsed - this.attack.duration < attackStep.continueWindow)) {
+                if (playerDebugData.comboGapStatus) {
                     this.attack.step++
                     attackStep = attacksData[attackName].steps[this.attack.step]
                     // debug: ratio of time last for combination attack
-                    playerDebugData.attackCombinationWindowBar = (timeNow - this.attack.lastUsed - this.attack.duration) / attackStep.continueWindow
+                    //playerDebugData.comboGapStatus = (timeNow - this.attack.lastUsed - this.attack.duration) / attackStep.continueWindow
                 } else {
                     this.attack.step = 0
                     attackStep = attacksData[attackName].steps[this.attack.step]
                     // debug: ratio of time last for combination attack
-                    playerDebugData.attackCombinationWindowBar = 0
+                    //playerDebugData.comboGapStatus = 0
                 }
                 
                 this.attack.name = attackStep.name
@@ -108,10 +105,14 @@ class Player extends MovingEntity {
     }
 
     updateMovement(dt) {
-        if(this.occupied == false)
-            updatePlayerVelocityVector(dt)
+        if(!this.occupied)
+            playerVectorUpdateFoos[this.movement.type](this, dt)
         // move by velocity
         this.move(dt)
+    }
+
+    applyEffects() {
+
     }
 
     draw() {
@@ -165,46 +166,48 @@ class Player extends MovingEntity {
         this.attack.step = 0
     }
 
-    initSelectedItem() {
-        this.resetAttack()
-        if (this.getItem()) this.addItemSprite(this.getItem(), "hotbar")
-    }
-
     switchItem(slotId) {
-        if (this.getItem()) this.removeItemSprite(this.getItem(), "hotbar")
+        //if (this.getHotbarItem()) this.removeItemSprite(this.getHotbarItem(), "hotbar")
         eq.hotbar.selectedId = slotId
-        this.initSelectedItem()
+        this.resetHotbarSprite()
     }
 
-    addItemSprite(item, where) {
-        let spritePart, spriteName
-        if (where == "hotbar") {
-            spritePart = spritePartInHotbar(item.spritePart)
-            spriteName = spriteNameInHotbar(item.name, item.purpose)
-        } else {
-            spritePart = item.spritePart
-            spriteName = item.name
+    resetSpriteParts() {
+        this.resetArmorSprites()
+        this.resetHotbarSprite()
+    }
+
+    resetArmorSprites() {
+        for (let armorId = 0; armorId < 4; armorId++) {
+            let item = eq.armor.items[armorId]
+            if (item) {
+                this.sprite.setSpritePart(item.spritePart, item.name)
+            } else {
+                this.sprite.removeSpritePart(eq.armor.idToSpritePart[armorId])
+            }
         }
-        //console.log("adding item " + spriteName + " on " + where + " as " + spritePart)
-        this.sprite.setSpritePart(spritePart, spriteName)
     }
 
-    removeItemSprite(item, where) {
-        let spritePart
-        if (where == "hotbar") {
-            spritePart = spritePartInHotbar(item.spritePart)
+    resetHotbarSprite() {
+        let hotbarItem = this.getHotbarItem()
+        if (hotbarItem) {
+            let hotbarItemSpriteName = spriteNameInHotbar(hotbarItem.name, hotbarItem.purpose)
+            this.sprite.setSpritePart("weapon_r", hotbarItemSpriteName)
         } else {
-            spritePart = item.spritePart
+            this.sprite.removeSpritePart("weapon_r")
         }
-        this.sprite.removeSpritePart(spritePart)
     }
 
-    getItem() {
+    getHotbarItem() {
         return eq.hotbar.items[eq.hotbar.selectedId]
     }
-}
 
-export const player = new Player()
+    respawn() {
+        this.hp = 5
+        this.pos.x = 50
+        this.pos.y = 30
+    }
+}
 
 function updatePlayerReachPoint() {
     // face the mouse coursor
@@ -222,26 +225,44 @@ function updatePlayerReachPoint() {
     }
 }
 
-function updatePlayerVelocityVector(dt) {
-    playerVectorUpdateFoos[player.state.type](player, dt)
-}
+export const player = new Player()
 
 const playerVectorUpdateFoos = {
-    default: function (mEntity, dt) {
-        // update player movement controls
-        if (input.keyboard.pressingLeft && !input.keyboard.pressingRight)
-            player.v.x = -1
-        else if (input.keyboard.pressingRight && !input.keyboard.pressingLeft)
-            player.v.x = 1
-        else player.v.x = 0
-    
-        if (input.keyboard.pressingUp && !input.keyboard.pressingDown)
-            player.v.y = -1
-        else if (input.keyboard.pressingDown && !input.keyboard.pressingUp)
-            player.v.y = 1
-        else player.v.y = 0
-    },
-    knockback: vectorUpdateKnockback
+    default: updatePlayerVectorDefault,
+    reversed: updatePlayerVectorReversed,
+    knockback: updateEntityKnockback,
+    timedKnockback: updateEntityTimeKnockback,
+    stun: updateEntityStun
+}
+
+function updatePlayerVectorDefault(player, dt) {
+    // update player movement controls
+    if (input.keyboard.pressingLeft && !input.keyboard.pressingRight)
+        player.v.x = -1
+    else if (input.keyboard.pressingRight && !input.keyboard.pressingLeft)
+        player.v.x = 1
+    else player.v.x = 0
+
+    if (input.keyboard.pressingUp && !input.keyboard.pressingDown)
+        player.v.y = -1
+    else if (input.keyboard.pressingDown && !input.keyboard.pressingUp)
+        player.v.y = 1
+    else player.v.y = 0
+}
+
+function updatePlayerVectorReversed(player, dt) {
+    // update player movement controls
+    if (input.keyboard.pressingLeft && !input.keyboard.pressingRight)
+        player.v.x = 1
+    else if (input.keyboard.pressingRight && !input.keyboard.pressingLeft)
+        player.v.x = -1
+    else player.v.x = 0
+
+    if (input.keyboard.pressingUp && !input.keyboard.pressingDown)
+        player.v.y = 1
+    else if (input.keyboard.pressingDown && !input.keyboard.pressingUp)
+        player.v.y = -1
+    else player.v.y = 0
 }
 
 function playerAttackFromItem(item) {
@@ -251,14 +272,8 @@ function playerAttackFromItem(item) {
 }
 
 export const playerDebugData = {
-    attackDurationBar: 0,
-    attackCombinationWindowBar: 0
-}
-
-function spritePartInHotbar(spritePart) {
-    if (spritePart == "weapon_r" || spritePart == "weapon_l")
-        return spritePart
-    return "weapon_r"
+    actionProgress: 0,
+    comboGapStatus: 0
 }
 
 function spriteNameInHotbar(spriteName, spritePurpose) {

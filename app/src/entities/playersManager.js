@@ -21,6 +21,7 @@ class OtherPlayer extends MovingEntity {
             "head": "head"
         })
         this.activity = "idle_down"
+        this.hp = 0
     }
 
     draw() {
@@ -74,13 +75,14 @@ export const playersManager = {
         let otherPlayer = players[pKey]
         otherPlayer.pos.x = pVal.x
         otherPlayer.pos.y = pVal.y
-        otherPlayer.v.x = pVal.vx
-        otherPlayer.v.y = pVal.vy
+        otherPlayer.v.x = pVal.vx / 2
+        otherPlayer.v.y = pVal.vy / 2
         otherPlayer.activity = pVal.activity
         otherPlayer.reachPoint.x = pVal.reachPointX
         otherPlayer.reachPoint.y = pVal.reachPointY
+        otherPlayer.hp = pVal.hp
     },
-    setOtherPlayerOutfit(pKey, outfit) {
+    setOtherPlayerSpriteParts(pKey, outfit) {
         if (!players[pKey]) {
             players[pKey] = new OtherPlayer()
         }

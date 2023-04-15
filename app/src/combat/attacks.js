@@ -1,3 +1,5 @@
+import { dbPathTo, dbUpdater } from "../db/gameDatabase"
+import { player } from "../entities/player"
 import { collision } from "../physics/collision"
 import { combat } from "./combat"
 
@@ -34,7 +36,6 @@ export const attacksData = {
 
 const attackFoos = {
     punch: function (wielder, mobEntities, playerEntities) {
-        console.log("punch!")
         // if player initiated attack (leftclick)
         let damageHitbox = {
             type: 'line',
@@ -54,11 +55,21 @@ const attackFoos = {
         })
 
         Object.keys(playerEntities).forEach(entityId=> {
-            let p = playerEntities[entityId]
-            if (collision.detect(damageHitbox, p.hitbox)) {
-                console.log("collision detected")
-                combat.applyKnockbackOnOtherPlayer(p, entityId)
-                //delete mobs[mobId]
+            let victim = playerEntities[entityId]
+            if (collision.detect(damageHitbox, victim.hitbox)) {
+                let knockback = combat.createKnockbackMovement(player, victim)
+                
+                dbUpdater.tasks.push({
+                    action: "set",
+                    where: `${dbPathTo.playerReceivedAttacks}/${entityId}`,
+                    val: {
+                        dmg: 1,
+                        movement: knockback,
+                        specialEffects: [
+                            // fire, poison, slowness, weakness
+                        ]
+                    }
+                })
             }
         })
     }
