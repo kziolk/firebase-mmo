@@ -64,9 +64,9 @@ class Player extends MovingEntity {
         else {
             // update debug bar indicating time remaining for combination attack
             let attackName = playerAttackFromItem(this.getHotbarItem())
-            let attackStep = attacksData[attackName].steps[this.attack.step]
-            if ((this.attack.step < attacksData[attackName].steps.length - 1)) {
-                playerDebugData.comboGapStatus = 1 - (timeNow - this.attack.lastUsed - this.attack.duration) / attackStep.continueWindow
+            this.attack.step = attacksData[attackName].steps[this.attack.stepNr]
+            if ((this.attack.stepNr < attacksData[attackName].steps.length - 1)) {
+                playerDebugData.comboGapStatus = 1 - (timeNow - this.attack.lastUsed - this.attack.duration) / this.attack.step.continueWindow
                 playerDebugData.comboGapStatus *= (0 < playerDebugData.comboGapStatus)
             } else {
                 playerDebugData.comboGapStatus = 0
@@ -75,22 +75,32 @@ class Player extends MovingEntity {
             if (this.attack.triggered) {
                 // if trigger occurs just after last attack then maybe it's the COMBINATION???
                 if (playerDebugData.comboGapStatus) {
-                    this.attack.step++
-                    attackStep = attacksData[attackName].steps[this.attack.step]
+                    this.attack.stepNr++
+                    this.attack.step = attacksData[attackName].steps[this.attack.stepNr]
                     // debug: ratio of time last for combination attack
                     //playerDebugData.comboGapStatus = (timeNow - this.attack.lastUsed - this.attack.duration) / attackStep.continueWindow
                 } else {
-                    this.attack.step = 0
-                    attackStep = attacksData[attackName].steps[this.attack.step]
+                    this.attack.stepNr = 0
+                    this.attack.step = attacksData[attackName].steps[this.attack.stepNr]
                     // debug: ratio of time last for combination attack
                     //playerDebugData.comboGapStatus = 0
                 }
+                if (this.attack.step === undefined) {
+                    this.attack.triggered = false
+                    return
+                }
                 
-                this.attack.name = attackStep.name
-                attacks.trigger(this, mobs, players)
+                this.attack.name = this.attack.step.name
+                attacks.trigger(
+                    this, 
+                    {
+                        mobs: mobs,
+                        otherPlayers: players
+                    }, 
+                    null)
                 this.occupied = true
-                this.activity = attackStep.activity
-                this.attack.duration = attackStep.duration
+                this.activity = this.attack.step.activity
+                this.attack.duration = this.attack.step.duration
                 this.attack.lastUsed = timeNow
                 let animationName = this.activity + "_" + this.direction
                 let animationFrameDuration = this.attack.duration / animations.player[animationName].frameCount
@@ -111,7 +121,7 @@ class Player extends MovingEntity {
         this.move(dt)
     }
 
-    applyEffects() {
+    applyEffects(effects) {
 
     }
 
@@ -204,8 +214,8 @@ class Player extends MovingEntity {
 
     respawn() {
         this.hp = 5
-        this.pos.x = 50
-        this.pos.y = 30
+        this.pos.x = 0
+        this.pos.y = 0
     }
 }
 

@@ -1,12 +1,13 @@
 import alea from "alea"
 import { player } from "./entities/player"
 import { timeNow } from "./game"
+import { startChunkListener } from "./db/terrain"
 
 export const CHUNK_SIZE = 2
 export const GRID_SIZE = 3
 let playerChunkPos
 let lastBufferPurgeTime
-const bufferPurgeDelay = 60 * 1000 
+const bufferPurgeDelay = 1 * 1000 
 
 export const terrain = {
     init() {
@@ -20,10 +21,10 @@ export const terrain = {
             for (let gy = 0; gy < GRID_SIZE; gy++) {
                 let cx = playerChunkPos.x + (gx - 1) * CHUNK_SIZE
                 let cy = playerChunkPos.y + (gy - 1) * CHUNK_SIZE
-                fetchChunkAtXY(cx, cy)
                 let chunkId = xyToId(cx, cy)
+                loadChunk(chunkId)
                 this.grid[gx][gy] = this.chunkBuffer[chunkId]
-                this.grid[gx][gy].loaded = true
+                this.grid[gx][gy].toDelete = false
             }
         }
 
@@ -55,9 +56,8 @@ export const terrain = {
         oldChunkIds.forEach(oldId => {
             // if it's no longer on this frame, then unload chunk
             if (!newChunkIds.includes(oldId)) {
-                console.log("bye old chunk")
                 // unloadChunk(oldId)
-                this.chunkBuffer[oldId].loaded = false
+                this.chunkBuffer[oldId].toDelete = true
             }
         })
 
@@ -65,11 +65,8 @@ export const terrain = {
         newChunkIds.forEach(newId => {
             // if it wasn't in previous frame, then load chunk
             if (!oldChunkIds.includes(newId)) {
-                console.log("hello new chunk")
-                // loadChunk(newId)
-                let chunkPos = idToXY(newId)
-                fetchChunkAtXY(chunkPos.x, chunkPos.y)
-                this.chunkBuffer[newId].loaded = true
+                loadChunk(newId)
+                this.chunkBuffer[newId].toDelete = false
             }
         })
 
@@ -86,12 +83,13 @@ export const terrain = {
             let purgeCount = 0
             Object.keys(this.chunkBuffer).forEach(chunkId => {
                 let chunk = this.chunkBuffer[chunkId]
-                if (!chunk.loaded) {
+                if (chunk.toDelete) {
                     purgeCount ++
                     delete this.chunkBuffer[chunkId]
                 }
             })
-            console.log("Deleted " + purgeCount + " chunks from memory")
+            // console.log("Deleted " + purgeCount + " chunks from memory")
+            // console.log(this.chunkBuffer)
             lastBufferPurgeTime = timeNow
         }
         
@@ -137,20 +135,24 @@ function pos2ChunkPos(pos) {
     }
 }
 
-function fetchChunkAtXY(cx, cy) {
-    // create empty chunk
-    let chunkId = xyToId(cx, cy)
-    terrain.chunkBuffer[chunkId] = {
-        x: cx,
-        y: cy,
-        tiles: null
+function loadChunk(id) {
+    // if there is no such chunk in buffer
+    if (!terrain.chunkBuffer[id]) {
+    // create new empty chunk template
+        let pos = idToXY(id)
+        terrain.chunkBuffer[id] = {
+            x: pos.x,
+            y: pos.y,
+            tiles: null,
+            status: "fetching"
+        }
     }
-    // grabbing chunk from db...
-    new Promise(resolve => setTimeout(resolve, 2000)).
-    then(() => {
-        // set chunk
-        terrain.chunkBuffer[chunkId].tiles = generateChunkTiles(cx, cy)
-    })
+    // else if (terrain.chunkBuffer[id].status == "fetching") {
+    //     console.log("chunk " + id + " is being ")
+    //     // abort. this chunk is already being fetched
+    //     return
+    // }
+    //startChunkListener(id)
 }
 
 function xyToId(cx, cy) {

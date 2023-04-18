@@ -22,11 +22,13 @@ export const game = {
     },
     async start() {
         // initialize components
-        input.init();
+        input.init()
         terrain.init()
         
         // adds default equipment
         eq.init()
+        
+        // init variables from database
         if (this.mode == "multiplayer") {
             // get eq from database, wait untill it is done
             await getEq()
@@ -34,15 +36,17 @@ export const game = {
             await database.initPlayer()
             // listen for changes in other players
             startPlayersListener()
-            
+        } 
+        // or init locally
+        else {
+            player.setPosition({x: 0, y: 0})
         }
         player.resetSpriteParts()
-
         // camera needs player to be initiated
         cam.init();
         
         // start timer
-        timeNow = oldTime = performance.now();
+        timeNow = oldTime = performance.now()
 
         // initialize more components which needed timer
         debugInfo.init()
@@ -53,7 +57,7 @@ export const game = {
             graphic.draw()
         }, 1000 / this.config.fpsLimit)
 
-        consoleLogSomethingAfterInit();
+        consoleLogSomethingAfterInit()
     },
     stop() {
         clearInterval(loop)
@@ -63,7 +67,7 @@ export const game = {
 function update() {
     // grab current time and calculate frame delay
     oldTime = timeNow
-    timeNow = performance.now();
+    timeNow = performance.now()
     dt = timeNow - oldTime;
     
     // entity update

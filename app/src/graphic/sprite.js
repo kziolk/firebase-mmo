@@ -46,8 +46,8 @@ export class ComplexSprite {
         this.animation = animations[this.entityName]["walking_down"]
         this.frameDuration = 200
 
-        console.log("Added complex sprite")
-        console.log(this)
+        // console.log("Added complex sprite")
+        // console.log(this)
     }
 
     setSpritePart(partName, spriteName) {
@@ -184,7 +184,7 @@ export const animations = {
                 "arm_l", "legs", "torso", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
-        punch_down: {
+        punch_r_down: {
             x: 128,
             y: 0,
             frameCount: 1,
@@ -192,7 +192,7 @@ export const animations = {
                 "arm_l", "legs", "torso", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
-        punch_right: {
+        punch_r_right: {
             x: 128,
             y: 32,
             frameCount: 1,
@@ -200,7 +200,7 @@ export const animations = {
                 "arm_l", "legs", "torso", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
-        punch_left: {
+        punch_r_left: {
             x: 128,
             y: 64,
             frameCount: 1,
@@ -208,7 +208,7 @@ export const animations = {
                 "weapon_r", "arm_r", "legs", "torso", "arm_l", "head", "helmet"
             ]
         },
-        punch_up: {
+        punch_r_up: {
             x: 128,
             y: 96,
             frameCount: 1,
@@ -216,7 +216,7 @@ export const animations = {
                 "arm_l", "legs", "torso", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
-        kick_down: {
+        punch_l_down: {
             x: 160,
             y: 0,
             frameCount: 1,
@@ -224,7 +224,7 @@ export const animations = {
                 "arm_l", "legs", "torso", "head", "helmet", "arm_r"
             ]
         },
-        kick_right: {
+        punch_l_right: {
             x: 160,
             y: 32,
             frameCount: 1,
@@ -232,7 +232,7 @@ export const animations = {
                 "arm_l", "legs", "torso", "head", "helmet", "arm_r"
             ]
         },
-        kick_left: {
+        punch_l_left: {
             x: 160,
             y: 64,
             frameCount: 1,
@@ -240,7 +240,7 @@ export const animations = {
                 "arm_l", "legs", "torso", "head", "helmet", "arm_r"
             ]
         },
-        kick_up: {
+        punch_l_up: {
             x: 160,
             y: 96,
             frameCount: 1,
@@ -248,36 +248,36 @@ export const animations = {
                 "arm_l", "legs", "torso", "head", "helmet", "arm_r"
             ]
         },
-        "360_down": {
+        swordswipe_down: {
             x: 192,
             y: 0,
-            frameCount: 4,
+            frameCount: 1,
             drawOrder: [
-                "arm_l", "legs", "torso", "head", "helmet", "arm_r"
+                "arm_l", "legs", "torso", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
-        "360_right": {
+        swordswipe_right: {
             x: 192,
             y: 32,
-            frameCount: 4,
+            frameCount: 1,
             drawOrder: [
-                "arm_l", "legs", "torso", "head", "helmet", "arm_r"
+                "arm_l", "legs", "torso", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
-        "360_left": {
+        swordswipe_left: {
             x: 192,
             y: 64,
-            frameCount: 4,
+            frameCount: 1,
             drawOrder: [
-                "arm_l", "legs", "torso", "head", "helmet", "arm_r"
+                "legs", "torso", "arm_l", "head", "helmet", "weapon_r", "arm_r"
             ]
         },
-        "360_up": {
+        swordswipe_up: {
             x: 192,
             y: 96,
-            frameCount: 4,
+            frameCount: 1,
             drawOrder: [
-                "arm_l", "legs", "torso", "head", "helmet", "arm_r"
+                "weapon_r", "arm_l", "legs", "torso", "head", "helmet", "arm_r"
             ]
         }
     }

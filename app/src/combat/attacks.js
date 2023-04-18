@@ -1,42 +1,36 @@
 import { dbPathTo, dbUpdater } from "../db/gameDatabase"
+import { mobs } from "../entities/mobs/mobsManager"
 import { player } from "../entities/player"
 import { collision } from "../physics/collision"
-import { combat } from "./combat"
+import { applyEffectsOn, combat } from "./combat"
 
 export const attacks = {
-    trigger(wielder, mobEntities, playerEntities) {
+    trigger(wielder, victims, excludes) {
         const executeAttack = attackFoos[wielder.attack.name]
-        if (executeAttack) executeAttack(wielder, mobEntities, playerEntities)
+        if (executeAttack) executeAttack(wielder, victims, excludes)
     }
 }
 
 export const attacksData = {
     fist: {
         steps: [
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
-            { duration: 200, baseAttack: 10, activity: "kick", continueWindow: 500, name: "punch" }
+            { duration: 200, baseDmg: 1, activity: "punch_r", continueWindow: 500, name: "punch" },
+            { duration: 200, baseDmg: 1, activity: "punch_l", name: "punch" }
         ]
     },
     sword: {
         steps: [
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
-            { duration: 200, baseAttack: 10, activity: "kick", continueWindow: 500, name: "punch" },
-            { duration: 200, baseAttack: 10, activity: "punch", continueWindow: 500, name: "punch" },
-            { duration: 500, baseAttack: 10, activity: "kick", continueWindow: 500, name: "punch" }
+            { duration: 400, baseDmg: 2, activity: "swordswipe", name: "punch" }
         ]
     },
     bow: {
-        steps: [
-            { duration: 100, baseAttack: 10, activity: "360", name: "punch" }
-        ]
+        steps: []
     }
 }
 
 const attackFoos = {
-    punch: function (wielder, mobEntities, playerEntities) {
-        // if player initiated attack (leftclick)
+    punch: function (wielder, victims, excludes) {
+        // create attack hitbox
         let damageHitbox = {
             type: 'line',
             p1: wielder.reachPoint,
@@ -45,32 +39,44 @@ const attackFoos = {
                 y: (wielder.pos.y + wielder.reachPoint.y) / 2
             }
         }
+         
+        // create attack effects
+        let effects = {
+            dmg: wielder.attack.step.baseDmg,
+            knockback: combat.createKnockback(wielder.pos, wielder.reachPoint, 4, 0.8)
+        }
+        Object.keys(victims).forEach(victimType=> {
+            let entities = victims[victimType]
+            Object.keys(entities).forEach(eId => {
+                let victim = entities[eId]
+                // if collision detected then apply attack effects on the victim entity
+                if (collision.detect(damageHitbox, victim.hitbox)) {
+                    Object.keys(effects).forEach(eName=>{
+                        let effect = effects[eName]
+                        applyEffectsOn[victimType][eName](victim, effect)
+                    })
+                }
 
-        Object.keys(mobEntities).forEach(entityId=> {
-            let m = mobEntities[entityId]
-            if (collision.detect(damageHitbox, m.hitbox)) {
-                //combat.applyKnockbackOnMob(m)
-                delete mobs[mobId]
-            }
+            })
         })
 
-        Object.keys(playerEntities).forEach(entityId=> {
-            let victim = playerEntities[entityId]
-            if (collision.detect(damageHitbox, victim.hitbox)) {
-                let knockback = combat.createKnockbackMovement(player, victim)
+        // Object.keys(playerEntities).forEach(entityId=> {
+        //     let victim = playerEntities[entityId]
+        //     if (collision.detect(damageHitbox, victim.hitbox)) {
+        //         let knockback = combat.createKnockbackMovement(player, victim)
                 
-                dbUpdater.tasks.push({
-                    action: "set",
-                    where: `${dbPathTo.playerReceivedAttacks}/${entityId}`,
-                    val: {
-                        dmg: 1,
-                        movement: knockback,
-                        specialEffects: [
-                            // fire, poison, slowness, weakness
-                        ]
-                    }
-                })
-            }
-        })
+        //         dbUpdater.tasks.push({
+        //             action: "set",
+        //             where: `${dbPathTo.playerReceivedAttacks}/${entityId}`,
+        //             val: {
+        //                 dmg: 1,
+        //                 movement: knockback,
+        //                 specialEffects: [
+        //                     // fire, poison, slowness, weakness
+        //                 ]
+        //             }
+        //         })
+        //     }
+        // })
     }
 }

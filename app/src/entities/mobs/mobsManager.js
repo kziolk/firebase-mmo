@@ -3,8 +3,8 @@ import { Mob } from "./mob"
 export const mobs = {}
 export const mobsManager = {
     createMob(pos) {
-        let mobKey = Math.floor(Math.random() * 10000000)
-        mobs[mobKey] = new Mob(pos)
+        let mobId = Math.floor(Math.random() * 10000000)
+        mobs[mobId] = new Mob(pos, mobId)
     },
     updateActions(dt) {
         Object.keys(mobs).forEach(mobKey=>{

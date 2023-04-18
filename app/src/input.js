@@ -75,10 +75,10 @@ const modes = {
                 input.setMode("eq")
             },
             spawnMob: function() { 
-                // mobsManager.createMob({
-                //     x: player.pos.x + Math.random() * 10 - 5,
-                //     y: player.pos.y + Math.random() * 10 - 5 
-                // });
+                mobsManager.createMob({
+                    x: player.pos.x + Math.random() * 10 - 5,
+                    y: player.pos.y + Math.random() * 10 - 5 
+                })
             },
             openMenu: function() {
                 input.setMode("menu")
